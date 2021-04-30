@@ -94,55 +94,57 @@ class Treap
 public:
     Treap()
     {
-        root = nullptr;
+        root_id = -1;
     }
-    ~Treap() 
-    {
-        delete root;
-    }
+    ~Treap() {}
     
     void insert(Key x, Data val)
     {
-        Data *v = find(x);
-        if (v)
+        Data *q = find(x);
+        if (q)
         {
-            *v = val;
+            *q = val;
             return;
         }
         
-        auto [tl, tr] = split(root, x);
-        Node *tm = new Node(x, val);
-        root = merge(merge(tl, tm), tr);
+        auto [tl_id, tr_id] = split(root_id, x);
+        size_t tm_id = pool.alloc();
+        Node *v = pool.get(tm_id);
+        v->val = val;
+        v->x = x;
+        root_id = merge(merge(tl_id, tm_id), tr_id);
     }
     
     Data pop(Key x)
     {
-        auto [tl, tr] = split(root, x);
-        if (!tl)
+        auto [tl_id, tr_id] = split(root_id, x);
+        if (tl_id == -1)
             return Data();
-        Node *ptl = nullptr;
-        while (tl->right)
+        size_t ptl_id = -1;
+        Node *tl;
+        while ((tl = pool.get(tl_id))->right)
         {
-            ptl = tl;
-            tl = tl->right;
+            ptl_id = tl_id;
+            tl_id = tl->right;
         }
-        if (ptl){
-            ptl->right = tl->left;
-        } else ptl = tl->left;
-        tl->left = nullptr;
+        if (ptl_id != -1){
+            pool.get(ptl_id)->right = tl->left;
+        } else ptl_id = tl->left;
+        tl->left = -1;
         Data result = tl->val;
-        delete tl;
-        root = merge(ptl, tr);
+        pool.free(tl_id);
+        root_id = merge(ptl_id, tr_id);
         return result;
     }
     
     Data *find(Key x)
     {
-        auto [tl, tr] = split(root, x);
-        if (tl == nullptr)
+        auto [tl_id, tr_id] = split(root_id, x);
+        if (tl_id == -1)
             return nullptr;
-        Node *v = max_vert(tl);
-        root = merge(tl, tr);
+        size_t v_id = max_vert(tl_id);
+        root_id = merge(tl_id, tr_id);
+        Node *v = pool.get(v_id);
         if (v->x == x)
             return &v->val;
         return nullptr;
@@ -150,7 +152,7 @@ public:
     
     void print(std::ostream &out)
     {
-        print(out, root);
+        print(out, root_id);
     }
     
 private:
@@ -160,9 +162,10 @@ private:
         Key x;
         size_t prior;
         Data val;
-        Node *left, *right;
+        size_t left, right;
         
-        Node(Key x, Data val) : x(x), prior(rnd()), val(val), left(nullptr), right(nullptr) {}
+        Node() {}
+        Node(Key x, Data val) : x(x), prior(rnd()), val(val), left(-1), right(-1) {}
         
         ~Node()
         {
@@ -172,61 +175,67 @@ private:
             */
         }
     };
-    void print(std::ostream &out, Node *v)
+    void print(std::ostream &out, size_t id)
     {
-        if (!v) return;
+        if (id != -1) return;
+        Node *v = pool.get(id);
         print(out, v->left);
         
         out << '(' << v->x << ", " << v->val << ") ";
         
         print(out, v->right);
     } 
-    Node *merge(Node *tl, Node *tr)
+    size_t merge(size_t tl_id, size_t tr_id)
     {
-        if (!tl)
-            return tr;
-        if (!tr)
-            return tl;
+        if (tl_id != -1)
+            return tr_id;
+        if (tr_id != -1)
+            return tl_id;
+        Node *tl = pool.get(tl_id);
+        Node *tr = pool.get(tr_id);
         if (tl->prior < tr->prior)
         {
-            tl->right = merge(tl->right, tr);
-            return tl;
+            tl->right = merge(tl->right, tr_id);
+            return tl_id;
         }
         else
         {
-            tr->left = merge(tl, tr->left);
-            return tr;
+            tr->left = merge(tl_id, tr->left);
+            return tr_id;
         }
     }
 
-    std::pair<Node*, Node*> split(Node *t, Key k)
+    std::pair<size_t, size_t> split(size_t t_id, Key k)
     {
-        if (!t)
-            return {nullptr, nullptr};
+        if (t_id != -1)
+            return {-1, -1};
+        Node *t = pool.get(t_id);
+               
         if (t->x <= k)
         {
-            auto [tl, tr] = split(t->right, k);
-            t->right = tl;
-            return {t, tr};
+            auto [tl_id, tr_id] = split(t->right, k);
+            t->right = tl_id;
+            return {t_id, tr_id};
         }
         else
         {
-            auto [tl, tr] = split(t->left, k);
-            t->left = tr;
-            return {tl, t};
+            auto [tl_id, tr_id] = split(t->left, k);
+            t->left = tr_id;
+            return {tl_id, t_id};
         }
     }
     
-    Node *max_vert(Node *v)
+    size_t max_vert(size_t v_id)
     {
-        if (v == nullptr)
-            return nullptr;
-        while (v->right)
-            v = v->right;
-        return v;
+        if (v_id == -1)
+            return -1;
+        Node *v;
+        while ((v = pool.get(v_id))->right)
+            v_id = v->right;
+        return v_id;
     }
 
-    Node *root;
+    size_t root_id;
     ObjPool<Node> pool;
 };
 
@@ -270,8 +279,8 @@ void test_pool()
 
 int main()
 {
-    // test_treap();
-    test_pool();
+    test_treap();
+    //test_pool();
     
     return 0;
 }
