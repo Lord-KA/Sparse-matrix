@@ -6,6 +6,8 @@
 #include <random>
 #include <vector>
 #include <iostream>
+#include <cassert>
+#include <set>
 
 std::mt19937 rnd(179);
 //==================================
@@ -38,6 +40,8 @@ public:
     
     Data *get(size_t id)
     {
+        // std::cerr << (id == -1) << ' ' << id << '\n'; //DEBUG
+        assert(id < capacity);
         return &data[id].val;
     }
     
@@ -82,11 +86,20 @@ private:
             data[i].next = i + 1;
         data[capacity - 1].next = -1;
         last_free = capacity / 2;
+        // std::cout << "last_free = " << last_free << '\n'; //DEBUG
     }
 };
 
 //==================================
 // Treap
+
+#define TREAP_CHECK(v) { \
+    if (!graph_check(v)) \
+    { \
+        std::cerr << "Treap error at " << __func__ << "\n"; \
+        std::cerr.flush(); \
+        std::exit(0); \
+    } }
 
 template<typename Key, typename Data>
 class Treap
@@ -109,6 +122,7 @@ public:
         
         auto [tl_id, tr_id] = split(root_id, x);
         size_t tm_id = pool.alloc();
+        // std::cout << "tm_id in insert=" << tm_id << '\n'; //DEBUG
         Node *v = pool.get(tm_id);
         v->val = val;
         v->x = x;
@@ -122,7 +136,7 @@ public:
             return Data();
         size_t ptl_id = -1;
         Node *tl;
-        while ((tl = pool.get(tl_id))->right)
+        while ((tl = pool.get(tl_id))->right != -1)
         {
             ptl_id = tl_id;
             tl_id = tl->right;
@@ -139,13 +153,16 @@ public:
     
     Data *find(Key x)
     {
-        auto [tl_id, tr_id] = split(root_id, x);
-        if (tl_id == -1)
-            return nullptr;
-        size_t v_id = max_vert(tl_id);
-        root_id = merge(tl_id, tr_id);
-        Node *v = pool.get(v_id);
-        if (v->x == x)
+        size_t cur_id = root_id;
+        Node *v;
+        while (cur_id != -1 && ((v = pool.get(cur_id))->x != x))
+        {
+            if (v->x > x)
+                cur_id = v->left;
+            else
+                cur_id = v->right;
+        }
+        if (cur_id != -1)
             return &v->val;
         return nullptr;
     }
@@ -155,7 +172,60 @@ public:
         print(out, root_id);
     }
     
+    void print_graph(std::ostream &out)
+    {
+        static size_t dumpn = 0;
+        out << "digraph tree" << dumpn++ <<  "{\n"
+               "    node [shape=record];\n";
+        if (root_id != -1)
+            print_graph(out, root_id);
+        out << "};\n";
+    }
+    
+    bool graph_check()
+    {
+        return graph_check(root_id);
+    }
+    bool graph_check(size_t id)
+    {
+        std::set<size_t> S;
+        return graph_check(id, S);
+    }
+    
 private:
+    bool graph_check(size_t id, std::set<size_t> &S)
+    {
+        if (id == -1)
+            return true;            
+        // assert(S.find(id) == S.end());
+        if (S.find(id) != S.end())
+            return false;
+        S.insert(id);
+        Node *v = pool.get(id);
+        bool result = 1;
+        if (v->right != -1)
+            result |= graph_check(v->right, S);
+        if (v->left != -1)
+            result |= graph_check(v->left, S);
+        return result;
+    }
+
+    void print_graph(std::ostream &out, size_t id)
+    {
+        Node *v = pool.get(id);
+        out << "struct" << id << " [label=\"" << id << " | { key = " << v->x << " | data = " << v->val
+        << " }\"];\n";
+        if (v->left != -1)
+        {
+            out << "struct" << id << " -> " << "struct" << v->left << ";\n";
+            print_graph(out, v->left);
+        }
+        if (v->right != -1)
+        {
+            out << "struct" << id << " -> " << "struct" << v->right << ";\n";
+            print_graph(out, v->right);
+        }
+    }
     
     struct Node
     {
@@ -187,10 +257,14 @@ private:
     } 
     size_t merge(size_t tl_id, size_t tr_id)
     {
-        if (tl_id != -1)
+        //graph_check(std::cerr);
+        TREAP_CHECK(tl_id);
+        TREAP_CHECK(tr_id);
+        if (tl_id == -1)
             return tr_id;
-        if (tr_id != -1)
+        if (tr_id == -1)
             return tl_id;
+        // std::cout << "in merge tl_id, tr_id = " << tl_id << ' ' << tr_id << '\n'; //DEBUG
         Node *tl = pool.get(tl_id);
         Node *tr = pool.get(tr_id);
         if (tl->prior < tr->prior)
@@ -207,7 +281,7 @@ private:
 
     std::pair<size_t, size_t> split(size_t t_id, Key k)
     {
-        if (t_id != -1)
+        if (t_id == -1)
             return {-1, -1};
         Node *t = pool.get(t_id);
                
@@ -241,46 +315,3 @@ private:
 
 
 #endif
-
-void test_treap()
-{
-    Treap<int, int> t;
-    
-    t.insert(3, 3);
-    t.insert(1, 1);
-    t.insert(2, 2);
-    t.insert(2, 4);
-
-    t.print(std::cerr);
-    std::cerr << "\n";
-    t.pop(2);
-    t.print(std::cerr);
-}
-
-void test_pool()
-{
-    const int n = 6;
-    ObjPool<int> pool(n);
-    pool.print(std::cerr);
-    
-    for (int i = 0; i < n + 1; ++i)
-    {
-        std::cerr << pool.alloc() << "\n";
-        pool.print(std::cerr);
-    }
-    
-    //pool.alloc();
-    //pool.print(std::cerr);
-    
-    
-}
-
-
-
-int main()
-{
-    test_treap();
-    //test_pool();
-    
-    return 0;
-}
