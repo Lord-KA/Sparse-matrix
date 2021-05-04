@@ -10,11 +10,21 @@ void test_treap()
     t.print(std::cerr);
     t.insert(2, 2);
     t.print(std::cerr);
-    t.insert(2, 4);
+    t.insert(4, 4);
+    t.print(std::cerr);
+
+    t.insert(5, 5);
+    t.print(std::cerr);
+
+    t.insert(9, 9);
     t.print(std::cerr);
 
     std::cerr << "\n";
-    t.pop(2);
+    t.erase(2);
+    t.print(std::cerr);
+    t.erase(3);
+    t.print(std::cerr);
+    t.erase(9);
     t.print(std::cerr);
     std::cout << t.find(17) << '\n';
 }
@@ -34,7 +44,7 @@ void test_treap_2()
     t.print_graph(std::cerr);
 
     std::cerr << "\n";
-    t.pop(2);
+    t.erase(2);
     t.print_graph(std::cerr);
 }
 
@@ -71,10 +81,11 @@ void test_pool()
 int main()
 {
     test_treap();
-    std::cerr << "\n\n\n";
-    test_treap_2();
-    std::cerr << "\n\n\n";
-    test_pool();
+    //std::cerr << "\n\n\n";
+    //test_treap_2();
+    //std::cerr << "\n\n\n";
+    //test_pool();
     
     return 0;
 }
+

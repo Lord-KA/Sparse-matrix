@@ -14,5 +14,5 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -std=c++20 -Werror -Wall 
 
 #add_executable(time Time.cpp Time.hpp test-time.cpp)
 #add_executable(unlint unlint.cpp unlint.hpp test-unlint.cpp)
-add_executable(spmatrix spmatrix.cpp spmatrix.hpp test-spmatrix.cpp treap.hpp)
+#add_executable(spmatrix spmatrix.hpp test-spmatrix.cpp treap.hpp)
 add_executable(treap treap.hpp test-treap.cpp)

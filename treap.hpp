@@ -38,7 +38,7 @@ public:
         return result;
     }
     
-    Data *get(size_t id)
+    Data *get(size_t id) const
     {
         // std::cerr << (id == -1) << ' ' << id << '\n'; //DEBUG
         assert(id < capacity);
@@ -127,16 +127,17 @@ public:
         v->val = val;
         v->x = x;
         root_id = merge(merge(tl_id, tm_id), tr_id);
-        //print_graph(std::cout);
+        TREAP_CHECK(root_id);
     }
     
+    /*
     Data pop(Key x)
     {
         auto [tl_id, tr_id] = split(root_id, x);
         if (tl_id == -1)
             return Data();
         size_t ptl_id = -1;
-        Node *tl;
+        Node *tl = nullptr;
         while ((tl = pool.get(tl_id))->right != -1)
         {
             ptl_id = tl_id;
@@ -146,10 +147,51 @@ public:
             pool.get(ptl_id)->right = tl->left;
         } else ptl_id = tl->left;
         tl->left = -1;
+        
         Data result = tl->val;
         pool.free(tl_id);
         root_id = merge(ptl_id, tr_id);
+        TREAP_CHECK(root_id);
         return result;
+    }
+    */
+    void erase(Key x)
+    {
+      if (root_id != -1)
+      {
+        root_id = erase(root_id, x);
+      }
+    }
+    
+    size_t erase(size_t id, Key x)
+    {
+      if (id == -1)
+        return -1;
+      Node *v = pool.get(id);
+      if (v->x == x)
+      {
+        size_t tl_id = v->left;
+        size_t tr_id = v->right;
+        
+        pool.free(id);
+        return merge(tl_id, tr_id);
+      }
+      
+      if (v->x < x)
+      {
+        v->right = erase(v->right, x);
+        v->update(pool);
+        return id;
+      }
+      else
+      {
+        v->left = erase(v->left, x);
+        v->update(pool);
+        return id;
+      }
+        
+      
+        
     }
     
     Data *find(Key x)
@@ -199,7 +241,7 @@ private:
     {
         if (id == -1)
             return true;            
-        if (S.contains(id))
+        if (S.find(id) != S.end())
             return false;
         S.insert(id);
         Node *v = pool.get(id);
@@ -235,10 +277,19 @@ private:
         size_t prior;
         Data val;
         size_t left, right;
+        size_t size;
         
-        Node() : left(-1), right(-1), prior(rnd()){}
-        Node(Key x, Data val) : x(x), prior(rnd()), val(val), left(-1), right(-1) {}
+        Node() : left(-1), right(-1), size(1), prior(rnd()){}
+        Node(Key x, Data val) : x(x), prior(rnd()), val(val), left(-1), right(-1), size(1) {}
         
+        void update(ObjPool<Node> &p)
+        {
+          size = 1;
+          if (left != -1)
+            size += p.get(left)->size;
+          if (right != -1)
+            size += p.get(right)->size;
+        }
         ~Node()
         {
             /*
@@ -254,13 +305,12 @@ private:
         Node *v = pool.get(id);
         print(out, v->left);
         
-        out << '(' << v->x << ", " << v->val << ") ";
+        out << '(' << v->x << ", " << v->val << ", " << v->size << ") ";
         
         print(out, v->right);
     } 
     size_t merge(size_t tl_id, size_t tr_id)
     {
-        //graph_check(std::cerr);
         TREAP_CHECK(tl_id);
         TREAP_CHECK(tr_id);
         if (tl_id == -1)
@@ -273,11 +323,15 @@ private:
         if (tl->prior < tr->prior)
         {
             tl->right = merge(tl->right, tr_id);
+            tl->update(pool);
+            TREAP_CHECK(tl_id);
             return tl_id;
         }
         else
         {
             tr->left = merge(tl_id, tr->left);
+            tl->update(pool);
+            TREAP_CHECK(tr_id);
             return tr_id;
         }
     }
@@ -292,12 +346,18 @@ private:
         {
             auto [tl_id, tr_id] = split(t->right, k);
             t->right = tl_id;
+            t->update(pool);
+            TREAP_CHECK(tr_id);
+            TREAP_CHECK(t_id);
             return {t_id, tr_id};
         }
         else
         {
             auto [tl_id, tr_id] = split(t->left, k);
             t->left = tr_id;
+            t->update(pool);
+            TREAP_CHECK(tl_id);
+            TREAP_CHECK(t_id);
             return {tl_id, t_id};
         }
     }
