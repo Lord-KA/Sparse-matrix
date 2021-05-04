@@ -11,7 +11,7 @@ template<typename T>
 class SPMatrix{
     private:
 
-        size_t len;
+        // size_t len;
         size_t rows;
         size_t cols;
 
@@ -19,8 +19,8 @@ class SPMatrix{
 
 
     public:
-        SPMatrix() = default;
-        SPMatrix( size_t rows, size_t cols );
+        SPMatrix() = default; //TODO think if this is fine
+        SPMatrix( size_t rows, size_t cols ) : rows(rows), cols(cols) {};
         SPMatrix( const SPMatrix &other );
         SPMatrix( SPMatrix &&other );
         
@@ -28,9 +28,9 @@ class SPMatrix{
 
         SPMatrix operator+( const SPMatrix &other) const;
         SPMatrix operator-( const SPMatrix &other) const;
-        SPMatrix operator-() const;
+        SPMatrix operator-() const {return -1 * (*this);};
 
-        inline SPMatrix operator+() const {return SPMatrix(*this);};
+        inline SPMatrix operator+() const {return (*this);};
 
         SPMatrix operator*( const SPMatrix &other ) const;
         SPMatrix operator*( const long long int &n ) const;
@@ -45,6 +45,9 @@ class SPMatrix{
 
         T& operator() ( const size_t i, const size_t j ) const;
         T& operator() ( const size_t i, const size_t j );
+        
+        void insert(size_t x, size_t y, T value);
+        void pop(size_t x, size_t y);
 
         //TODO think if get/set len/rows/cols funcs are needed
 
@@ -59,5 +62,6 @@ class SPMatrix{
 
 
 };
+
 
 #endif

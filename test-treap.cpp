@@ -6,17 +6,17 @@ void test_treap()
     
     t.insert(3, 3);
     t.print(std::cerr);
-    t.graph_check();
     t.insert(1, 1);
     t.print(std::cerr);
     t.insert(2, 2);
-    t.insert(2, 4);
-    
-
     t.print(std::cerr);
+    t.insert(2, 4);
+    t.print(std::cerr);
+
     std::cerr << "\n";
     t.pop(2);
     t.print(std::cerr);
+    std::cout << t.find(17) << '\n';
 }
 void test_treap_2()
 {
@@ -26,12 +26,13 @@ void test_treap_2()
     t.graph_check();
     
     t.print_graph(std::cerr);
-    
     t.insert(1, 1);
-    t.insert(2, 2);
-    t.insert(2, 4);
-
     t.print_graph(std::cerr);
+    t.insert(2, 2);
+    t.print_graph(std::cerr);
+    t.insert(2, 4);
+    t.print_graph(std::cerr);
+
     std::cerr << "\n";
     t.pop(2);
     t.print_graph(std::cerr);
@@ -40,7 +41,7 @@ void test_treap_2()
 void test_pool()
 {
     const int n = 6;
-    ObjPool<int> pool(n);
+    ObjPool<int> pool;
     pool.print(std::cerr);
     
     for (int i = 0; i < n + 1; ++i)
@@ -48,19 +49,32 @@ void test_pool()
         std::cerr << pool.alloc() << "\n";
         pool.print(std::cerr);
     }
+    pool.free(0);
+    pool.print(std::cerr);
+    pool.free(2);
     
-    //pool.alloc();
-    //pool.print(std::cerr);
+    pool.print(std::cerr);
     
-    
+    pool.alloc();
+    pool.print(std::cerr);
+
+    pool.alloc();
+    pool.print(std::cerr);
+
+
+    pool.alloc();
+    pool.print(std::cerr);
 }
 
 
 
 int main()
 {
+    test_treap();
+    std::cerr << "\n\n\n";
     test_treap_2();
-    //test_pool();
+    std::cerr << "\n\n\n";
+    test_pool();
     
     return 0;
 }

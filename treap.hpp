@@ -127,6 +127,7 @@ public:
         v->val = val;
         v->x = x;
         root_id = merge(merge(tl_id, tm_id), tr_id);
+        //print_graph(std::cout);
     }
     
     Data pop(Key x)
@@ -170,6 +171,7 @@ public:
     void print(std::ostream &out)
     {
         print(out, root_id);
+        out << '\n';
     }
     
     void print_graph(std::ostream &out)
@@ -197,17 +199,17 @@ private:
     {
         if (id == -1)
             return true;            
-        // assert(S.find(id) == S.end());
-        if (S.find(id) != S.end())
+        if (S.contains(id))
             return false;
         S.insert(id);
         Node *v = pool.get(id);
-        bool result = 1;
         if (v->right != -1)
-            result &= graph_check(v->right, S);
+            if (!graph_check(v->right, S))
+                return false;
         if (v->left != -1)
-            result &= graph_check(v->left, S);
-        return result;
+            if (!graph_check(v->left, S))
+                return false;
+        return true;
     }
 
     void print_graph(std::ostream &out, size_t id)
@@ -234,7 +236,7 @@ private:
         Data val;
         size_t left, right;
         
-        Node() {}
+        Node() : left(-1), right(-1), prior(rnd()){}
         Node(Key x, Data val) : x(x), prior(rnd()), val(val), left(-1), right(-1) {}
         
         ~Node()
@@ -247,7 +249,8 @@ private:
     };
     void print(std::ostream &out, size_t id)
     {
-        if (id != -1) return;
+        TREAP_CHECK(id);
+        if (id == -1) return;
         Node *v = pool.get(id);
         print(out, v->left);
         
