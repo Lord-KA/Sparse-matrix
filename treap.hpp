@@ -96,7 +96,7 @@ private:
 #define TREAP_CHECK(v) { \
     if (!graph_check(v)) \
     { \
-        std::cerr << "Treap error at " << __func__ << "\n"; \
+        std::cerr << "Treap error in " << __func__ << " at " << __LINE__ << "\n"; \
         std::cerr.flush(); \
         std::exit(0); \
     } }
@@ -204,9 +204,9 @@ private:
         Node *v = pool.get(id);
         bool result = 1;
         if (v->right != -1)
-            result |= graph_check(v->right, S);
+            result &= graph_check(v->right, S);
         if (v->left != -1)
-            result |= graph_check(v->left, S);
+            result &= graph_check(v->left, S);
         return result;
     }
 

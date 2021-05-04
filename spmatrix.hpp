@@ -15,7 +15,7 @@ class SPMatrix{
         size_t rows;
         size_t cols;
 
-        T *matrix;
+        Treap<std::pair<size_t, size_t>, T> matrix;
 
 
     public:
@@ -45,6 +45,8 @@ class SPMatrix{
 
         T& operator() ( const size_t i, const size_t j ) const;
         T& operator() ( const size_t i, const size_t j );
+
+        //TODO think if get/set len/rows/cols funcs are needed
 
     friend std::ostream& operator<<( std::ostream &out, const SPMatrix &a){
         //TODO add outp

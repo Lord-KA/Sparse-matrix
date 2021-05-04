@@ -3,10 +3,12 @@
 
 #include <string>
 #include <iostream>
+#include <bitset>
 
 class ulint{
     private:
         std::string num;
+
 
     public:
         ulint();
@@ -25,8 +27,13 @@ class ulint{
         ulint& operator*=( const ulint &other );
         ulint& operator/=( const ulint &other );
         ulint& operator=( const ulint &other );
+        
+        operator std::string() const;
+
 
         friend std::ostream& operator<<(std::ostream &out, const ulint &n);
+
+        friend std::istream& operator>>(const std::istream &in, ulint &n);
 };
 
 #endif
