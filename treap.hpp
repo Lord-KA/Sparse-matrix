@@ -41,6 +41,7 @@ public:
     Data *get(size_t id) const
     {
         // std::cerr << (id == -1) << ' ' << id << '\n'; //DEBUG
+        assert(id != -1);
         assert(id < capacity);
         return &data[id].val;
     }
@@ -86,7 +87,6 @@ private:
             data[i].next = i + 1;
         data[capacity - 1].next = -1;
         last_free = capacity / 2;
-        // std::cout << "last_free = " << last_free << '\n'; //DEBUG
     }
 };
 
@@ -104,13 +104,40 @@ private:
 template<typename Key, typename Data>
 class Treap
 {
+private:
+    struct Node;
+
 public:
+
     Treap()
     {
         root_id = -1;
     }
     ~Treap() {}
     
+    struct Iterator
+    {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = Node;
+        
+        Iterator(size_t id=-1, ObjPool<Node>* pool=nullptr) : id(id), pool(pool) {}
+        
+        Iterator operator++();
+
+
+        Data operator*() { return pool->get(id)->val; }
+        
+
+        private:
+            size_t id;
+            ObjPool<Node>* pool;
+    };
+
+    Iterator begin() { return Iterator(pool.get(root_id)); }
+    Iterator end() { return Iterator(pool.get(max_vert(root_id))); }
+    
+
     void insert(Key x, Data val)
     {
         Data *q = find(x);
@@ -122,7 +149,7 @@ public:
         
         auto [tl_id, tr_id] = split(root_id, x);
         size_t tm_id = pool.alloc();
-        // std::cout << "tm_id in insert=" << tm_id << '\n'; //DEBUG
+        assert(tm_id != -1);
         Node *v = pool.get(tm_id);
         v->val = val;
         v->x = x;
@@ -130,31 +157,6 @@ public:
         TREAP_CHECK(root_id);
     }
     
-    /*
-    Data pop(Key x)
-    {
-        auto [tl_id, tr_id] = split(root_id, x);
-        if (tl_id == -1)
-            return Data();
-        size_t ptl_id = -1;
-        Node *tl = nullptr;
-        while ((tl = pool.get(tl_id))->right != -1)
-        {
-            ptl_id = tl_id;
-            tl_id = tl->right;
-        }
-        if (ptl_id != -1){
-            pool.get(ptl_id)->right = tl->left;
-        } else ptl_id = tl->left;
-        tl->left = -1;
-        
-        Data result = tl->val;
-        pool.free(tl_id);
-        root_id = merge(ptl_id, tr_id);
-        TREAP_CHECK(root_id);
-        return result;
-    }
-    */
     void erase(Key x)
     {
       if (root_id != -1)
@@ -173,22 +175,23 @@ public:
         size_t tl_id = v->left;
         size_t tr_id = v->right;
         
+        v->parent = -1;
+        if (tr_id != -1)
+            pool.get(tr_id)->parent = -1;
+        if (tl_id != -1)
+            pool.get(tl_id)->parent = -1;
+
         pool.free(id);
         return merge(tl_id, tr_id);
       }
       
       if (v->x < x)
-      {
         v->right = erase(v->right, x);
-        v->update(pool);
-        return id;
-      }
       else
-      {
         v->left = erase(v->left, x);
-        v->update(pool);
-        return id;
-      }
+
+      update(id);
+      return id;
         
       
         
@@ -228,6 +231,8 @@ public:
     
     bool graph_check()
     {
+        if (root_id != -1 && pool.get(root_id)->parent != -1)
+            return false;
         return graph_check(root_id);
     }
     bool graph_check(size_t id)
@@ -246,16 +251,17 @@ private:
         S.insert(id);
         Node *v = pool.get(id);
         if (v->right != -1)
-            if (!graph_check(v->right, S))
+            if (!graph_check(v->right, S) || pool.get(v->right)->parent != id)
                 return false;
         if (v->left != -1)
-            if (!graph_check(v->left, S))
+            if (!graph_check(v->left, S) || pool.get(v->left)->parent != id)
                 return false;
         return true;
     }
 
     void print_graph(std::ostream &out, size_t id)
     {
+        assert(id != -1);
         Node *v = pool.get(id);
         out << "struct" << id << " [label=\"" << id << " | { key = " << v->x << " | data = " << v->val
         << " }\"];\n";
@@ -276,27 +282,14 @@ private:
         Key x;
         size_t prior;
         Data val;
+        size_t parent;
         size_t left, right;
         size_t size;
         
-        Node() : left(-1), right(-1), size(1), prior(rnd()){}
-        Node(Key x, Data val) : x(x), prior(rnd()), val(val), left(-1), right(-1), size(1) {}
+        Node() : parent(-1), left(-1), right(-1), size(1), prior(rnd()){}
+        Node(Key x, Data val) : x(x), prior(rnd()), val(val), parent(-1), left(-1), right(-1), size(1) {}
         
-        void update(ObjPool<Node> &p)
-        {
-          size = 1;
-          if (left != -1)
-            size += p.get(left)->size;
-          if (right != -1)
-            size += p.get(right)->size;
-        }
-        ~Node()
-        {
-            /*
-            if (left) delete left;
-            if (right) delete right;
-            */
-        }
+        ~Node() {};
     };
     void print(std::ostream &out, size_t id)
     {
@@ -317,20 +310,19 @@ private:
             return tr_id;
         if (tr_id == -1)
             return tl_id;
-        // std::cout << "in merge tl_id, tr_id = " << tl_id << ' ' << tr_id << '\n'; //DEBUG
         Node *tl = pool.get(tl_id);
         Node *tr = pool.get(tr_id);
         if (tl->prior < tr->prior)
         {
             tl->right = merge(tl->right, tr_id);
-            tl->update(pool);
+            update(tl_id);
             TREAP_CHECK(tl_id);
             return tl_id;
         }
         else
         {
             tr->left = merge(tl_id, tr->left);
-            tl->update(pool);
+            update(tr_id);
             TREAP_CHECK(tr_id);
             return tr_id;
         }
@@ -346,7 +338,10 @@ private:
         {
             auto [tl_id, tr_id] = split(t->right, k);
             t->right = tl_id;
-            t->update(pool);
+            update(t_id);
+            if (tr_id != -1)
+                pool.get(tr_id)->parent = -1;
+            t->parent = -1;
             TREAP_CHECK(tr_id);
             TREAP_CHECK(t_id);
             return {t_id, tr_id};
@@ -355,13 +350,46 @@ private:
         {
             auto [tl_id, tr_id] = split(t->left, k);
             t->left = tr_id;
-            t->update(pool);
+            update(t_id);
+            if (tl_id != -1)
+                pool.get(tl_id)->parent = -1;
+            t->parent = -1;
             TREAP_CHECK(tl_id);
             TREAP_CHECK(t_id);
             return {tl_id, t_id};
         }
     }
     
+    void update(size_t id)
+    {
+        assert(id != -1);
+
+        Node* v = pool.get(id);
+        v->size = 1;
+        if (v->left != -1)
+        {
+            Node* tl = pool.get(v->left);
+            v->size += tl->size;
+            tl->parent = id;
+        }
+        if (v->right != -1)
+        {
+            Node* tr = pool.get(v->right);
+            v->size += tr->size;
+            tr->parent = id;
+        }
+    }
+
+    size_t min_vert(size_t v_id)
+    {
+        if (v_id == -1)
+            return -1;
+        Node *v;
+        while ((v = pool.get(v_id))->left)
+            v_id = v->left;
+        return v_id;
+    }
+
     size_t max_vert(size_t v_id)
     {
         if (v_id == -1)
@@ -371,7 +399,6 @@ private:
             v_id = v->right;
         return v_id;
     }
-
     size_t root_id;
     ObjPool<Node> pool;
 };
