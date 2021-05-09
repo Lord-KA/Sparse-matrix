@@ -102,7 +102,7 @@ private:
     } }
 
 template<typename Key, typename Data>
-class Treap
+class Treap //TODO write copy/move semantics
 {
 private:
     struct Node;
@@ -124,6 +124,14 @@ public:
         Iterator(size_t id=-1, ObjPool<Node>* pool=nullptr) : id(id), pool(pool) {}
         Iterator(const Iterator &other) : id(other.id), pool(other.pool) {};
         
+        bool operator==(const Iterator other) { return id == other.id;}
+
+        std::pair<Key, Data&> operator*() { Node* v = pool->get(id); \
+                                            return std::pair(v->x, v->val); }
+
+        // Data operator->() { return pool->get(id)->val; }
+    
+
         Iterator operator++() 
         {
             assert(id != -1);
@@ -222,11 +230,6 @@ public:
             return result;
         }
         
-        bool operator==(const Iterator other) { return id == other.id;}
-
-
-        Data& operator*() { return pool->get(id)->val; }
-        Data operator->() { return pool->get(id)->val; }
         
 
         private:
@@ -297,7 +300,7 @@ public:
         
     }
     
-    Data *find(Key x)
+    Data& find(Key x)
     {
         size_t cur_id = root_id;
         Node *v;
@@ -309,8 +312,8 @@ public:
                 cur_id = v->right;
         }
         if (cur_id != -1)
-            return &v->val;
-        return nullptr;
+            return v->val;
+        return Data();
     }
     
     void print(std::ostream &out)
