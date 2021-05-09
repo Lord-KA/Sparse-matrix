@@ -115,18 +115,118 @@ public:
     }
     ~Treap() {}
     
-    struct Iterator
+    struct Iterator //TODO add random_access_iterator support
     {
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type   = std::ptrdiff_t;
         using value_type        = Node;
         
         Iterator(size_t id=-1, ObjPool<Node>* pool=nullptr) : id(id), pool(pool) {}
+        Iterator(const Iterator &other) : id(other.id), pool(other.pool) {};
         
-        Iterator operator++();
+        Iterator operator++() 
+        {
+            assert(id != -1);
+            Node* v = pool->get(id);
+            if (v->right != -1)
+            {
+                id = v->right;   
+                while ((v = pool->get(id))->left != -1)
+                    id = v->left;
+                return (*this);
+            }
+            while ((v = pool->get(id))->parent != -1)
+            {
+                if (pool->get(v->parent)->left == id)
+                {
+                    id = v->parent;
+                    return (*this);
+                }
+                id = v->parent;
+            }
+            id = -1;
+            return (*this);
+        }
+
+        Iterator operator++(int) 
+        {
+            assert(id != -1);
+            Node* v = pool->get(id);
+            Iterator result(*this);
+            if (v->right != -1)
+            {
+                id = v->right;
+                while ((v = pool->get(id))->left != -1)
+                    id = v->left;
+                return result;
+            }
+            while ((v = pool->get(id))->parent != -1)
+            {
+                if (pool->get(v->parent)->left == id)
+                {
+                    id = v->parent;
+                    return result;
+                }
+                id = v->parent;
+            }
+            id = -1;
+            return result;
+        }
+
+        Iterator operator--()
+        {
+            assert(id != -1);
+            Node* v = pool->get(id);
+            if (v->left != -1)
+            {
+                id = v->left;
+                while ((v = pool->get(id))->right != -1)
+                    id = v->right;
+                return (*this);
+            }
+            while ((v = pool->get(id))->parent != -1)
+            {
+                if (pool->get(v->parent)->right == id)
+                {
+                    id = v->parent;
+                    return (*this);
+                }
+                id = v->parent;
+            }
+            id = -1;
+            return (*this);
+        }
+
+        Iterator operator--(int)
+        {
+            assert(id != -1);
+            Node* v = pool->get(id);
+            Iterator result(*this);
+            if (v->left != -1)
+            {
+                id = v->left;
+                while ((v = pool->get(id))->right != -1)
+                    id = v->right;
+                return result;
+            }
+            while ((v = pool->get(id))->parent != -1)
+            {
+                if (pool->get(v->parent)->right == id)
+                {
+                    id = v->parent;
+                    return result;
+                }
+                id = v->parent;
+            }
+            id = -1;
+            return result;
+        }
+        
+        bool operator==(const Iterator other) { return id == other.id;}
 
 
-        Data operator*() { return pool->get(id)->val; }
+        Data& operator*() { return pool->get(id)->val; }
+        Data operator->() { return pool->get(id)->val; }
         
 
         private:
@@ -134,8 +234,8 @@ public:
             ObjPool<Node>* pool;
     };
 
-    Iterator begin() { return Iterator(pool.get(root_id)); }
-    Iterator end() { return Iterator(pool.get(max_vert(root_id))); }
+    Iterator begin() { return Iterator(min_vert(root_id), &pool); } 
+    Iterator end() { return Iterator(); }
     
 
     void insert(Key x, Data val)
@@ -385,7 +485,7 @@ private:
         if (v_id == -1)
             return -1;
         Node *v;
-        while ((v = pool.get(v_id))->left)
+        while ((v = pool.get(v_id))->left != -1) 
             v_id = v->left;
         return v_id;
     }
@@ -395,7 +495,7 @@ private:
         if (v_id == -1)
             return -1;
         Node *v;
-        while ((v = pool.get(v_id))->right)
+        while ((v = pool.get(v_id))->right != -1)
             v_id = v->right;
         return v_id;
     }
