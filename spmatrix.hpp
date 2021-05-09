@@ -67,12 +67,17 @@ class SPMatrix{
 
 template<typename T>
 T& SPMatrix<T>::operator() (const size_t i, const size_t j) const{
-    return matrix.find(std::pair<size_t, size_t>(i, j));
+    return *matrix.find(std::make_pair(i, j));
 }
 
 template<typename T>
 T& SPMatrix<T>::operator() (const size_t i, const size_t j) {
-    return matrix.find(std::pair<size_t, size_t>(i, j));
+    T* node = matrix.find(std::make_pair(i, j));
+    if (node)
+        return *node;
+    node = matrix.insert({i, j});
+
+    return *node;
 }
 
 template<typename T>
@@ -80,7 +85,7 @@ SPMatrix<T> SPMatrix<T>::operator+(const SPMatrix<T> &other) const {
     assert(rows == other.rows && cols == other.cols);
     SPMatrix result(other);
     for (auto elem : matrix)
-        result(elem[0][0], elem[0][1]) += elem[1];
+        result(elem.first.first, elem.first.second) += elem.second;
 
     return result;
 }
@@ -100,7 +105,7 @@ template<typename T>
 SPMatrix<T> SPMatrix<T>::operator*(const T &n) const {
     SPMatrix result(*this);
     for (auto elem : result.matrix)
-        elem[1] *= n;
+        elem.second *= n;
     return result;
 }
 
@@ -108,7 +113,7 @@ template<typename T>
 SPMatrix<T> SPMatrix<T>::operator+=(const SPMatrix<T> &other) {
     assert(rows == other.rows && cols == other.cols);
     for (auto elem : other.matrix)
-        (*this)(elem[0][0], elem[0][1]) += elem[1];
+        (*this)(elem.first.first, elem.first.second) += elem.second;
     return (*this);
 }
 
@@ -123,7 +128,7 @@ SPMatrix<T> SPMatrix<T>::operator-=(const SPMatrix<T> &other) {
 template<typename T>
 SPMatrix<T> SPMatrix<T>::operator*=(const T &n) {
     for (auto elem : matrix)
-        elem[1] *= n;
+        elem.second *= n;
     return *this;
 }
 

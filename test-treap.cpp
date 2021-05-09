@@ -22,24 +22,24 @@ void test_treap()
 
     
     for(auto elem : t)
-        std::cout << elem << ' ';
+        std::cout << elem.second << ' ';
     std::cout << '\n';
 
     for(auto elem : t){
-        ++elem;
-        std::cout << elem << ' ';
+        ++elem.second;
+        std::cout << elem.second << ' ';
     }
     std::cout << '\n';
 
     for(auto elem : t)
-        std::cout << elem << ' ';
+        std::cout << elem.second << ' ';
     std::cout << '\n';
 
     auto elem = t.begin();
     ++elem;
     ++elem;
     ++elem;
-    std::cout << *elem << ' ' << *(--elem) << ' ' << *(--elem) << ' ' << *(--elem) << '\n';
+    std::cout << (*elem).second<< ' ' << (*(--elem)).second << ' ' << (*(--elem)).second << ' ' << (*(--elem)).second << '\n';
  
 
     //std::cout << t.find(17) << '\n';
