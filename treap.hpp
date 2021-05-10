@@ -47,12 +47,14 @@ public:
     {
         capacity = std::exchange(other.capacity, 0);
         last_free = std::exchange(other.last_free, -1);
+        if (data)
+            delete[] data;
         data = std::exchange(other.data, nullptr);
         return (*this);
     }
     
 
-    ObjPool(size_t capacity = 1) : capacity(capacity) 
+    ObjPool(size_t capacity=1) : capacity(capacity) 
     {
         data = new Node [capacity];
         for (size_t i=0; i<capacity - 1; ++i)
@@ -285,7 +287,8 @@ public:
     Iterator begin() { return Iterator(min_vert(root_id), &pool); } 
     Iterator end()   { return Iterator(); }
     
-    //==================================
+
+    //======================================
     // TREAP internal functions
 
     Treap() : root_id(-1) {}

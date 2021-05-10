@@ -35,11 +35,11 @@ void test_treap()
         std::cout << elem.second << ' ';
     std::cout << '\n';
 
-    auto elem = t.begin();
-    ++elem;
-    ++elem;
-    ++elem;
-    std::cout << (*elem).second<< ' ' << (*(--elem)).second << ' ' << (*(--elem)).second << ' ' << (*(--elem)).second << '\n';
+    auto iter = t.begin();
+    ++iter;
+    ++iter;
+    ++iter;
+    std::cout << (*iter).second<< ' ' << (*(--iter)).second << ' ' << (*(--iter)).second << ' ' << (*(--iter)).second << '\n';
     
     std::cout << '\n';
 
@@ -49,10 +49,11 @@ void test_treap()
         std::cout << elem.second << ' ';
     std::cout << '\n';
     std::cout << '\n';
- 
+    t.erase(18);
     Treap<int, int> t3;
     t3 = std::move(t2);
-    //assert(((int*)&t3)[0] == 0xDEAD);
+    assert(((int*)&t3)[0] != 0xDEAD);
+    
 }
 void test_treap_2()
 {
@@ -70,7 +71,10 @@ void test_treap_2()
     t.print_graph(std::cerr);
 
     std::cerr << "\n";
-    t.erase(2);
+    t.erase(3);
+    t.erase(3);
+    t.erase(3);
+    t.erase(3);
     t.print_graph(std::cerr);
 }
 
@@ -98,8 +102,15 @@ void test_pool()
     pool.print(std::cerr);
 
 
-    pool.alloc();
     pool.print(std::cerr);
+
+    std::cerr << "\n\n";
+    ObjPool<int> othr(pool);
+    othr.print(std::cerr);
+    pool.alloc();
+    pool.alloc();
+    othr = std::move(pool);
+    othr.print(std::cerr);
 }
 
 
@@ -108,7 +119,6 @@ int main()
 {
     test_treap();
     std::cerr << "\n\n\n";
-    return 0;
 
     test_treap_2();
     std::cerr << "\n\n\n";
