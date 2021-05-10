@@ -16,6 +16,42 @@ std::mt19937 rnd(179);
 template<typename Data>
 class ObjPool{
 public:
+    
+    ObjPool(const ObjPool &other)
+    {
+        capacity = other.capacity;
+        last_free = other.last_free;
+        data = new Node[capacity];
+        std::copy(other.data, other.data + other.capacity, data);
+    }
+
+    ObjPool(ObjPool &&other)
+    {
+        capacity = std::exchange(other.capacity, 0);
+        last_free = std::exchange(other.last_free, -1);
+        data = std::exchange(other.data, nullptr);
+    }
+
+    ObjPool& operator=(const ObjPool &other)
+    {
+        capacity = other.capacity;
+        last_free = other.last_free;
+        if (data)
+            delete[] data;
+        data = new Node[capacity];
+        std::copy(other.data, other.data + other.capacity, data);
+        return (*this);
+    }
+
+    ObjPool& operator=(ObjPool &&other)
+    {
+        capacity = std::exchange(other.capacity, 0);
+        last_free = std::exchange(other.last_free, -1);
+        data = std::exchange(other.data, nullptr);
+        return (*this);
+    }
+    
+
     ObjPool(size_t capacity = 1) : capacity(capacity) 
     {
         data = new Node [capacity];
@@ -66,8 +102,7 @@ private:
     struct Node{
         size_t next;
         Data val;
-        // Node() : next(nullptr);
-        ~Node() {};
+        // ~Node() {};
     };
     
     Node *data;
@@ -80,6 +115,7 @@ private:
             return;
         Node *nbuf = new Node[capacity * 2];
         std::copy(data, data + capacity, nbuf);
+        assert(data);
         delete [] data;
         data = nbuf;
         capacity *= 2;
@@ -105,16 +141,25 @@ template<typename Key, typename Data>
 class Treap //TODO write copy/move semantics
 {
 private:
-    struct Node;
+     struct Node
+    {
+        Key x;
+        size_t prior;
+        Data val;
+        size_t parent;
+        size_t left, right;
+        size_t size;
+        
+        Node()                : prior(rnd()), parent(-1), left(-1), right(-1), size(1) {}
+        Node(Key x, Data val) : x(x), prior(rnd()), val(val), parent(-1), left(-1), right(-1), size(1) {}
+        
+        ~Node() {};
+    };
 
     size_t root_id;
     ObjPool<Node> pool;
 
 public:
-
-    Treap() : root_id(-1) {}
-    ~Treap() {}
-    
     struct Iterator //TODO add random_access_iterator support
     {
         using iterator_category = std::bidirectional_iterator_tag;
@@ -127,7 +172,7 @@ public:
         bool operator==( const Iterator other ) { return id == other.id;}
 
         std::pair<Key, Data&> operator*() { Node* v = pool->get(id); \
-                                            return std::make_pair(v->x, v->val); }
+                                            return {v->x, v->val}; }
 
         // Data operator->() { return pool->get(id)->val; }
     
@@ -239,6 +284,18 @@ public:
 
     Iterator begin() { return Iterator(min_vert(root_id), &pool); } 
     Iterator end()   { return Iterator(); }
+    
+    //==================================
+    // TREAP internal functions
+
+    Treap() : root_id(-1) {}
+    Treap(const Treap &other) : root_id(other.root_id), pool(other.pool) {}
+    Treap(Treap &&other);
+    ~Treap() {}
+
+
+    Treap& operator=(const Treap &other);
+    Treap& operator=(Treap &&other);
 
     void   insert( Key x, Data val );
     Data*  insert( Key x );
@@ -273,21 +330,6 @@ public:
     }
     
 private:
-    struct Node
-    {
-        Key x;
-        size_t prior;
-        Data val;
-        size_t parent;
-        size_t left, right;
-        size_t size;
-        
-        Node()                : prior(rnd()), parent(-1), left(-1), right(-1), size(1) {}
-        Node(Key x, Data val) : x(x), prior(rnd()), val(val), parent(-1), left(-1), right(-1), size(1) {}
-        
-        ~Node() {};
-    };
-
 
     bool graph_check( size_t id, std::set<size_t> &S );
     void print_graph( std::ostream &out, size_t id );
@@ -303,7 +345,29 @@ private:
 };
 
 
+template<typename Key, typename Data>
+Treap<Key, Data>::Treap(Treap &&other)
+{
+    root_id = std::exchange(other.root_id, -1);
+    pool = std::move(other.pool);
+}
 
+
+template<typename Key, typename Data>
+Treap<Key, Data>& Treap<Key, Data>::operator=(const Treap<Key, Data> &other)
+{
+    root_id = other.root_id;
+    pool = other.pool;
+    return (*this);
+}
+
+template<typename Key, typename Data>
+Treap<Key, Data>& Treap<Key, Data>::operator=(Treap<Key, Data> &&other)
+{
+    root_id = std::exchange(other.root_id, -1);
+    pool = std::move(other.pool);
+    return (*this);
+}
 
 template<typename Key, typename Data>
 void Treap<Key, Data>::insert(Key x, Data val)

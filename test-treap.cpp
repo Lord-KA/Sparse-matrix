@@ -40,9 +40,19 @@ void test_treap()
     ++elem;
     ++elem;
     std::cout << (*elem).second<< ' ' << (*(--elem)).second << ' ' << (*(--elem)).second << ' ' << (*(--elem)).second << '\n';
- 
+    
+    std::cout << '\n';
 
-    //std::cout << t.find(17) << '\n';
+    Treap t2(t);
+
+    for(auto elem : t2)
+        std::cout << elem.second << ' ';
+    std::cout << '\n';
+    std::cout << '\n';
+ 
+    Treap<int, int> t3;
+    t3 = std::move(t2);
+    //assert(((int*)&t3)[0] == 0xDEAD);
 }
 void test_treap_2()
 {
@@ -98,9 +108,11 @@ int main()
 {
     test_treap();
     std::cerr << "\n\n\n";
-    //test_treap_2();
-    //std::cerr << "\n\n\n";
-    //test_pool();
+    return 0;
+
+    test_treap_2();
+    std::cerr << "\n\n\n";
+    test_pool();
     
     return 0;
 }
