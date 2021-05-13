@@ -147,7 +147,7 @@ private:
     {
         Key x;
         size_t prior;
-        Data val;
+        Data val = Data();
         size_t parent;
         size_t left, right;
         size_t size;
@@ -176,6 +176,8 @@ public:
         std::pair<Key, Data&> operator*() { Node* v = pool->get(id); \
                                             return {v->x, v->val}; }
 
+        const std::pair<const Key, const Data&> operator*() const { Node* v = pool->get(id); \
+                                            return std::make_pair(v->x, v->val); } 
         // Data operator->() { return pool->get(id)->val; }
     
 
@@ -306,7 +308,7 @@ public:
     void   erase ( Key x ) { if (root_id != -1)  root_id = erase(root_id, x); }
     size_t erase ( size_t id, Key x );
         
-    Data* find( Key x );
+    Data* find( Key x ) const;
         
     void print      ( std::ostream &out ) { print(out, root_id); out << '\n'; }
     void print_graph( std::ostream &out )
@@ -441,7 +443,7 @@ size_t Treap<Key, Data>::erase(size_t id, Key x)
 }
 
 template<typename Key, typename Data>
-Data* Treap<Key, Data>::find(Key x)
+Data* Treap<Key, Data>::find(Key x) const
 {
     size_t cur_id = root_id;
     Node *v;

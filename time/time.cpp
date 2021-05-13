@@ -1,4 +1,4 @@
-#include "Time.hpp"
+#include "time.hpp"
 
 // time::time() : unix_time(0){};
 
@@ -41,10 +41,11 @@ Time& Time::operator-=(const Time &other)
     return (*this);
 }
 
-std::ostream& operator<<(std::ostream &out, const Time &T){
+std::ostream& operator<<(std::ostream &out, const Time &T){ /*
     size_t h = (T.unix_time % (60 * 60 * 24)) / 60 ;
     size_t m = (T.unix_time % (60 * 60)) / 60;
     size_t s = (T.unix_time % 60);
     out << "hour: " << h << " minute: " << m << " second: " << s << '\n';
-    return out;
+    return out;*/
+    out << std::ctime;
 }
