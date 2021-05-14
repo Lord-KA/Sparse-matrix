@@ -1,4 +1,5 @@
 #include "treap.hpp"
+#include <cassert>
 
 void test_treap()
 {
@@ -25,6 +26,7 @@ void test_treap()
         std::cout << elem.second << ' ';
     std::cout << '\n';
 
+    t.erase(7);
     for(auto elem : t){
         ++elem.second;
         std::cout << elem.second << ' ';
@@ -49,11 +51,21 @@ void test_treap()
         std::cout << elem.second << ' ';
     std::cout << '\n';
     std::cout << '\n';
-    t.erase(18);
+
+
     Treap<int, int> t3;
     t3 = std::move(t2);
-    assert(((int*)&t3)[0] != 0xDEAD);
-    
+    Treap t4(t3);
+    std::cout << '\n';
+    t.erase(8);
+    for(auto elem : t)
+        std::cout << elem.second << ' ';
+    std::cout << '\n';
+    for(auto elem : t3)
+        std::cout << elem.second << ' ';
+    std::cout << '\n';
+    std::cout << (bool)(t == t3) << ' ' << (bool)(t3 == t4) << '\n';
+    assert(((int*)&t3)[0] != 0xDEAD);   
 }
 void test_treap_2()
 {
@@ -113,6 +125,47 @@ void test_pool()
     othr.print(std::cerr);
 }
 
+void test_treap_3()
+{
+    Treap<int, int> t;
+    
+    t.insert(3, 3);
+    t.insert(1, 1);
+    // t.insert(2, 2);
+    t.insert(4, 4);
+
+    t.insert(5, 5);
+
+    t.insert(6, 6);
+    t.insert(7, 7);
+
+    t.insert(8, 8);
+    t.insert(9, 9);
+    t.insert(19, 19);
+    t.print(std::cerr);
+    t.print_graph(std::cerr);
+
+    for(auto elem : t)
+        std::cout << "(" << elem.first << ", " <<  elem.second << ");  ";
+    std::cout << '\n';
+    Treap t2(t);
+    t2.erase(3);
+    t2.erase(4);
+    
+    Treap t3(t2);
+    for(auto elem : t2)
+        std::cout << "(" << elem.first << ", " <<  elem.second << ");  ";
+    std::cout << '\n';
+
+    for(auto elem : t3)
+        std::cout << "(" << elem.first << ", " <<  elem.second << ");  ";
+
+    std::cout << '\n';
+    assert( t2 != t ); 
+    assert( t2 == t2 ); 
+    assert( t2 == t3 ); 
+    std::cout << "All good!\n"; 
+}
 
 
 int main()
@@ -124,6 +177,8 @@ int main()
     std::cerr << "\n\n\n";
     test_pool();
     
+    std::cerr << "\n\n\n";
+    test_treap_3();
     return 0;
 }
 

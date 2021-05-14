@@ -140,7 +140,7 @@ private:
     } }
 
 template<typename Key, typename Data>
-class Treap //TODO write copy/move semantics
+class Treap 
 {
 private:
      struct Node
@@ -168,7 +168,7 @@ public:
         using difference_type   = std::ptrdiff_t;
         using value_type        = Node;
         
-        Iterator( size_t id=-1, ObjPool<Node>* pool=nullptr ) : id(id), pool(pool) {}
+        Iterator( size_t id=-1, const ObjPool<Node>* pool=nullptr ) : id(id), pool(pool) {}
         Iterator( const Iterator &other )                     : id(other.id), pool(other.pool) {};
         
         bool operator==( const Iterator other ) { return id == other.id;}
@@ -178,7 +178,6 @@ public:
 
         const std::pair<const Key, const Data&> operator*() const { Node* v = pool->get(id); \
                                             return std::make_pair(v->x, v->val); } 
-        // Data operator->() { return pool->get(id)->val; }
     
 
         Iterator operator++() 
@@ -283,11 +282,11 @@ public:
 
         private:
             size_t id;
-            ObjPool<Node>* pool;
+            const ObjPool<Node>* pool;
     };
 
-    Iterator begin() { return Iterator(min_vert(root_id), &pool); } 
-    Iterator end()   { return Iterator(); }
+    Iterator begin() const { return Iterator(min_vert(root_id), &pool); } 
+    Iterator end()   const { return Iterator(); }
     
 
     //======================================
@@ -299,8 +298,10 @@ public:
     ~Treap() {}
 
 
-    Treap& operator=(const Treap &other);
-    Treap& operator=(Treap &&other);
+    Treap& operator=( const Treap &other );
+    Treap& operator=( Treap &&other );
+
+    bool  operator==( const Treap &other ) const;
 
     void   insert( Key x, Data val );
     Data*  insert( Key x );
@@ -344,9 +345,10 @@ private:
     std::pair<size_t, size_t> split( size_t t_id, Key k );
    
     void update( size_t id );
+    void insert( Node &node);                       //TODO write it to emplement faster 0 nodes removal
 
-    size_t min_vert( size_t v_id );
-    size_t max_vert( size_t v_id );
+    size_t min_vert( size_t v_id ) const;
+    size_t max_vert( size_t v_id ) const;
 };
 
 
@@ -372,6 +374,24 @@ Treap<Key, Data>& Treap<Key, Data>::operator=(Treap<Key, Data> &&other)
     root_id = std::exchange(other.root_id, -1);
     pool = std::move(other.pool);
     return (*this);
+}
+
+
+template<typename Key, typename Data>
+bool Treap<Key, Data>::operator==(const Treap<Key, Data> &other) const {
+    if (root_id != other.root_id)
+        return false;
+
+    auto iter_this = this->begin(), iter_other = other.begin();
+    while (iter_this != this->end() && iter_other != other.end()){
+        if (*iter_this != *iter_other)
+            return false;
+        ++iter_this;
+        ++iter_other;
+    }
+    if (iter_this != this->end() || iter_other != other.end())
+        return false;
+    return true;
 }
 
 template<typename Key, typename Data>
@@ -439,6 +459,7 @@ size_t Treap<Key, Data>::erase(size_t id, Key x)
         v->left = erase(v->left, x);
 
     update(id);
+    TREAP_CHECK(root_id);
     return id;
 }
 
@@ -579,7 +600,7 @@ void Treap<Key, Data>::update(size_t id)
 }
 
 template<typename Key, typename Data>
-size_t Treap<Key, Data>::min_vert(size_t v_id)
+size_t Treap<Key, Data>::min_vert(size_t v_id) const
 {
     if (v_id == -1)
         return -1;
@@ -603,7 +624,7 @@ void Treap<Key, Data>::print(std::ostream &out, size_t id)
 } 
 
 template<typename Key, typename Data>
-size_t Treap<Key, Data>::max_vert(size_t v_id)
+size_t Treap<Key, Data>::max_vert(size_t v_id) const
 {
     if (v_id == -1)
         return -1;
