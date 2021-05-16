@@ -26,8 +26,8 @@ class Matrix
 
 
     public:
-        Matrix() = default;
-        Matrix( size_t rows, size_t cols);
+        // Matrix() = default;
+        Matrix( size_t rows = 0, size_t cols = 0);
         Matrix( const Matrix & other);
         Matrix( Matrix&& other);
 
@@ -429,7 +429,7 @@ void Matrix<T>::FillMatrixRandom(T (*CustomRandom)())
 template<typename T>
 void Matrix<T>::FillMatrixRandom()
 {
-    for(size_t i = 0; i < rows; ++i)
+   for(size_t i = 0; i < rows; ++i)
         for(size_t j = 0; j < cols; ++j){
             (*this)(i, j) = Random<T>(); 
         }

@@ -115,7 +115,7 @@ SPMatrix<T>& SPMatrix<T>::operator=(const SPMatrix<T> &other) {
     rows = other.rows;
     cols = other.cols;
     matrix = other.matrix;
-    this->clenUp();
+    this->cleanUp();
     return (*this);
 }
 
@@ -124,7 +124,7 @@ SPMatrix<T>& SPMatrix<T>::operator=(SPMatrix<T> &&other) {
     rows = std::exchange(other.rows, 0);
     cols = std::exchange(other.cols, 0);
     matrix = std::move(other.matrix);
-    this->clenUp();
+    this->cleanUp();
     return (*this);
 }
 
@@ -191,7 +191,7 @@ SPMatrix<T> SPMatrix<T>::operator+=(const SPMatrix<T> &other) {
     assert(rows == other.rows && cols == other.cols);
     for (auto elem : other.matrix)
         (*this)(elem.first.first, elem.first.second) += elem.second;
-    this->clenUp();
+    this->cleanUp();
     return (*this);
 }
 
@@ -213,7 +213,7 @@ SPMatrix<T> SPMatrix<T>::operator*=(const T &n) {
 template<typename T>
 SPMatrix<T> SPMatrix<T>::operator*=(const SPMatrix<T> &other) { 
     (*this) = (*this) * other;
-    this->clenUp();
+    this->cleanUp();
     return (*this);
 }
 

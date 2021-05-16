@@ -6,7 +6,6 @@
 constexpr size_t n = 2;
 constexpr size_t k = 17;
 
-
 TEST(Multiplication, toEandConst) {
     Matrix<int> M1(n, n), M2(n, n);
     M1(0, 0) = 1;
@@ -121,6 +120,7 @@ TEST(Summing, RandomMultiplByConst) {
         EXPECT_EQ( SPMatrix(-M1), -S1);
         EXPECT_EQ( SPMatrix(M2), +S2);
 
+
         EXPECT_EQ( SPMatrix(M2 + 3 * M2 * 2 * cnst), 3 * S2 * 2 * cnst + S2 );
         EXPECT_NE( SPMatrix(M1 + M1 + M1), S1 * 13 + S2 );
     }
@@ -139,4 +139,65 @@ TEST(Other, Transposing) {
         EXPECT_NE( SPMatrix(M1.Transposition()), S2.Transpose() );
     }
 }
-                    //TODO write Test of copy/move semantics
+
+TEST(Other, Copy) {                     
+    for (int i = 0; i < 3; ++i){
+        Matrix<int> M1(4, 18);
+        M1.FillMatrixRandom();
+        Matrix M2(M1);
+        M2.FillMatrixRandom();
+        SPMatrix S1(M1), S2(M2);
+        SPMatrix S3 = S1 + S2;
+        Matrix M3 = M1 + M2;
+        SPMatrix S4(S1 + S3);
+        Matrix M4(M3 + M1);
+
+        EXPECT_EQ(SPMatrix(M3), S3);
+        EXPECT_EQ(SPMatrix(M4), S4);
+        SPMatrix<int> S5;
+        S5 = S1 * 17 + S3;
+        Matrix<int> M5;
+        M5 = M1 * 17 + M3;
+        EXPECT_EQ(SPMatrix(M5), S5);
+        S5 += S4;
+        M5 = M5 + M4;
+        EXPECT_EQ(SPMatrix(M5), S5);
+        S5 -= S3;
+        M5 = M5 - M3;
+        EXPECT_EQ(SPMatrix(M5), S5);
+        
+        Matrix<int> MM1(12, 23), MM2(23, 19);
+        MM1.FillMatrixRandom();
+        MM2.FillMatrixRandom();
+        SPMatrix SS1(MM1), SS2(MM2);
+        SS1 *= SS2;
+        MM1 = MM1 * MM2;
+        SS1 *= 127 * i;
+        MM1 = MM1 * 127 * i;
+        EXPECT_EQ(SPMatrix(MM1), SS1);
+        EXPECT_NE(SPMatrix(MM1), S1);
+        EXPECT_NE(SPMatrix(M4), S2);
+    }
+
+}
+
+TEST(Other, Move) {
+    for (int i = 0; i < 1; ++i){
+        Matrix<int> M1(18, 39), M2, M3, M4;
+        M1.FillMatrixRandom();
+        M2 = M1;
+        M2.FillMatrixRandom();
+        SPMatrix<int> S1(M1), S2(M2), S3, S4;
+        S3 = std::move(S1);
+        S4 = std::move(S2);
+        M3 = std::move(M1);
+        M4 = std::move(M2);
+    
+        EXPECT_EQ(SPMatrix(M3), S3);
+        EXPECT_EQ(SPMatrix(M4), S4);
+        SPMatrix S5(std::move(S3));
+        Matrix M5(std::move(M3));
+        EXPECT_EQ(SPMatrix(M5), S5);
+    }     
+}
+

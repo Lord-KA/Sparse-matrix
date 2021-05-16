@@ -121,6 +121,8 @@ void test_pool()
     othr.print(std::cerr);
     pool.alloc();
     pool.alloc();
+    ObjPool<int> pool3;
+    pool3 = pool;
     othr = std::move(pool);
     othr.print(std::cerr);
 }
