@@ -34,14 +34,13 @@ class ulint{
             std::string result;
             for (auto elem : num){
                 char buf = elem;
-                result += (buf % 8 + '0');
-                buf >>= 3;
-                result += (buf % 8 + '0');
-                buf >>= 3;
-                result += (buf % 8 + '0');
-                buf >>= 3;
-                result += (buf % 8 + '0');
- 
+                result += (buf % 16 + '0');
+                buf >>= 4;
+                result += (buf % 16 + '0');
+                buf >>= 4;
+                result += (buf % 16 + '0');
+                buf >>= 4;
+                result += (buf % 16 + '0');
             }
             return result;
         }
@@ -50,9 +49,12 @@ class ulint{
         friend std::ostream& operator<<(std::ostream &out, const ulint &n) {
             for (auto elem : n.num){
                 char buf = elem;
-                while (buf){
-                    out << (buf % 8 + '0');
-                    buf /= 8;
+                int cnt = 2;
+                while (cnt){
+                    --cnt;
+                    out << (buf % 16 + '0');
+                    std::cout << '\n' << std::bitset<8>(buf) << '\n';
+                    buf >>= 4;
                 }
             }
             return out;
@@ -65,13 +67,14 @@ class ulint{
             in.get(c);
             while (!in.eof() && c != '\n') {
                 ++cnt;
-                buf += c - '0';
-                if (cnt == 4) {
+                buf += (c - '0');
+                // std::cout << std::bitset<8>(buf) << '\n';
+                if (cnt == 2) {
                     n.num += buf;
                     cnt = 0;
+                    buf = 0;
                 }
-                buf *= 8;
-                std::cout << static_cast<int>(buf) << '\n';
+                buf <<= 4;
                 in.get(c);
             }
             if (buf)
