@@ -1,10 +1,24 @@
 #include "time.hpp"
 
+void Time::update(std::tm t)
+{ 
+    time = t;
+    unix_time = std::mktime(&time);
+}
+
+void Time::update(uint64_t u_t)
+{
+    unix_time = u_t;
+    time_t t = static_cast<time_t>(u_t);
+    time = *std::gmtime(&t);
+}
+
 
 Time Time::operator+(const Time &other) const 
 {
     Time result(other);
     result.unix_time += this->unix_time;
+    result.update(result.unix_time);
     return result;
 }
 
@@ -12,43 +26,51 @@ Time Time::operator-(const Time &other) const
 {
     Time result(other);
     result.unix_time -= this->unix_time;
+    result.update(result.unix_time);
     return result;
 }
 
 Time& Time::operator+=(const Time &other)
 {
     this->unix_time += other.unix_time;
+    update(unix_time);
     return (*this);
 }
 
 Time& Time::operator-=(const Time &other)
 {
     this->unix_time -= other.unix_time;
+    update(unix_time);
     return (*this);
 }
 
 Time Time::operator+(const uint64_t n) const {
     Time result(unix_time + n);
+    result.update(result.unix_time);
     return result;
 }
 
 Time Time::operator-(const uint64_t n) const {
     Time result(unix_time - n);
+    result.update(result.unix_time);
     return result;
 }
 
 Time& Time::operator+=(const uint64_t n) {
     unix_time += n;
+    update(unix_time);
     return (*this);
 }
 
 Time& Time::operator-=(const uint64_t n) {
     unix_time -= n;
+    update(unix_time);
     return (*this);
 }
 
 Time& Time::operator=(const Time &other) {
     unix_time = other.unix_time;
+    time = other.time;
     return (*this);
 }
 
@@ -62,11 +84,13 @@ void Time::FileTime(std::ostream &out) const {
 
 Time operator+(const uint64_t n, const Time &other){
     Time result(other.unix_time + n);
+    result.update(result.unix_time);
     return result;
 }
 
 Time operator-(const uint64_t n, const Time &other){
     Time result(other.unix_time - n);
+    result.update(result.unix_time);
     return result;
 }
 

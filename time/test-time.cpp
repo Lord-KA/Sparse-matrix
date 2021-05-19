@@ -37,3 +37,16 @@ TEST(Basic, operators) {
         EXPECT_NE( t1, t6 );
     }
 }
+
+TEST(Basic, GetSetTime) {
+    for (int i = 0; i < 100; ++i){
+        Time t1(rnd()), t2(rnd());
+        t1.setSec(rnd() % 61);
+        t2.setMin(rnd() % 61);
+        t1.setHour(rnd() % 25);
+        t2.setMDay(rnd() % 32);
+        t1.setMon(rnd() % 13);
+        t2.setYear(rnd());
+   }
+
+}
