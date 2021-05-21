@@ -13,7 +13,7 @@ class yearfa{
         uint16_t moonRing;      // from 1 to 19
 
     public:
-        yearfa(uint16_t n = 0);
+        explicit yearfa(uint16_t n = 0);
         yearfa(uint16_t indiction, uint16_t sunRing, uint16_t moonRing) : indiction(indiction), sunRing(sunRing), moonRing(moonRing) {}
 
         ~yearfa() = default;

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 project(Lab-1)
 
 set(CMAKE_CXX_STANDART 20)
+set(CMAKE_CXX_STANDART_REQUIRED ON)
 
 set(CMAKE_CXX_COMPILER_DEBUG clang++)
 set(CMAKE_CXX_COMPILER_SANITIZER clang++)
@@ -26,11 +27,6 @@ if(NOT googletest_POPULATED)
   add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
 endif()
 
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-)
 
 set_target_properties(gtest PROPERTIES FOLDER extern)
 set_target_properties(gtest_main PROPERTIES FOLDER extern)
@@ -39,7 +35,7 @@ set_target_properties(gmock_main PROPERTIES FOLDER extern)
 
 enable_testing()
 
-add_subdirectory(./time)
-add_subdirectory(./spmatrix)
+#add_subdirectory(./time)
+#add_subdirectory(./spmatrix)
 add_subdirectory(./ulint)
-add_subdirectory(./yearFA)
+#add_subdirectory(./yearFA)

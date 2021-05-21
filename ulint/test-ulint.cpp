@@ -3,6 +3,7 @@
 int main() {
     ulint u;
     std::cin >> u;
-    //std::cout << u.num << '\n';
+    //for (auto elem : u.num)
+    //    std::cout << std::bitset<8>(elem);
     std::cout << u << '\n';
 }

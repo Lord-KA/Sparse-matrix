@@ -67,7 +67,6 @@ class SPMatrix{                                            //TODO fix cleanUp;
         // void insert( size_t x, size_t y, T value );
         // void pop   ( size_t x, size_t y );
 
-        //TODO think if get/set len/rows/cols funcs are needed
 
     friend std::ostream& operator<<( std::ostream &out, const SPMatrix &M){
         for(size_t i=0; i < M.rows; ++i){

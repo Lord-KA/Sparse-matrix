@@ -2,83 +2,73 @@
 #define UNINT_HPP
 
 #include <string>
+#include <deque>
 #include <iostream>
 #include <bitset>
-
+#include <climits>
 
 class ulint{
-    //private:
-    public:
-        std::string num;
+    private:
+        bool neg;
+        std::deque<unsigned long long> data;
 
 
     public:
         ulint() = default;
-        ulint(const ulint &other);
-        ulint(const ulint &&other);
-        ulint(const std::string &other);
-        ~ulint() = default; //TODO find out if destructor is really needed
+        ulint(const ulint &other) : neg(other.neg), data(other.data) {}
+        ulint(const int64_t &n) : neg(n < 0) { data.push_back(std::abs(n)); }
+        ulint(ulint &&other) : neg(other.neg) { data = std::move(other.data); }
+        explicit ulint(const std::string &other);
+        ~ulint() = default; 
 
 
-        ulint operator+( const ulint &other ) const; //TODO think about creating template operators for all integer base types; same thing about constructors
+        ulint operator+( const ulint &other ) const; 
         ulint operator-( const ulint &other ) const;
-        ulint operator*( const ulint &other ) const;
-        ulint operator/( const ulint &other ) const;
-        ulint& operator+=( const ulint &other );
+        ulint operator*( const ulint &other ) const; //TODO
+        ulint operator/( const ulint &other ) const; //TODO
+        ulint operator%( const ulint &other ) const; //TODO
+        ulint& operator+=( const ulint &other );     
         ulint& operator-=( const ulint &other );
         ulint& operator*=( const ulint &other );
         ulint& operator/=( const ulint &other );
+        ulint& operator%=( const ulint &other );
         ulint& operator=( const ulint &other );
+    
+
+        uint64_t operator%( const int &n ) const;
+
+        bool operator==( const ulint &other ) const { return (neg == other.neg && data == other.data); }
+        bool operator< ( const ulint &other ) const;
+        bool operator> ( const ulint &other ) const;
+
+        operator bool() const { return (data.size() == 1 && data[0] == 0); }
         
-        operator std::string() const { 
-            std::string result;
-            for (auto elem : num){
-                char buf = elem;
-                result += (buf % 16 + '0');
-                buf >>= 4;
-                result += (buf % 16 + '0');
-                buf >>= 4;
-                result += (buf % 16 + '0');
-                buf >>= 4;
-                result += (buf % 16 + '0');
-            }
+        explicit operator std::string() const {
+            ulint other(*this);
+            std::string result = "";
+            do {
+                result.push_back(other % 10);
+                other /= 10;
+            } while (other);
+            if (neg)
+                result.push_back('-');
+            std::reverse(result.begin(), result.end());
             return result;
         }
 
 
         friend std::ostream& operator<<(std::ostream &out, const ulint &n) {
-            for (auto elem : n.num){
-                char buf = elem;
-                int cnt = 2;
-                while (cnt){
-                    --cnt;
-                    out << (buf % 16 + '0');
-                    std::cout << '\n' << std::bitset<8>(buf) << '\n';
-                    buf >>= 4;
-                }
-            }
+            out << static_cast<std::string>(n);
             return out;
         }
 
         friend std::istream& operator>>(std::istream &in, ulint &n) {
             char c;
-            char buf = 0;
-            int cnt = 0;
             in.get(c);
             while (!in.eof() && c != '\n') {
-                ++cnt;
-                buf += (c - '0');
-                // std::cout << std::bitset<8>(buf) << '\n';
-                if (cnt == 2) {
-                    n.num += buf;
-                    cnt = 0;
-                    buf = 0;
-                }
-                buf <<= 4;
-                in.get(c);
+                n *= 10;
+                n += c - '0';
             }
-            if (buf)
-                n.num += buf;
             return in;
         }
 };

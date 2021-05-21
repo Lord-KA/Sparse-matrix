@@ -33,7 +33,7 @@ class Time{
         void update(uint64_t u_t);
 
     public:
-        Time(uint64_t n = 0) { update(n); time.tm_isdst = false; }
+        explicit Time(uint64_t n = 0) { update(n); time.tm_isdst = false; }
         Time(const Time &other) : unix_time(other.unix_time), time(other.time) {time.tm_isdst = false; }
         ~Time() {}
         
