@@ -6,6 +6,7 @@
 #include <iostream>
 #include <bitset>
 #include <climits>
+#include <algorithm>
 
 class ulint{
     private:
@@ -16,32 +17,45 @@ class ulint{
     public:
         ulint() = default;
         ulint(const ulint &other) : neg(other.neg), data(other.data) {}
-        ulint(const int64_t &n) : neg(n < 0) { data.push_back(std::abs(n)); }
+        ulint(const int n) : neg(n < 0) { data.push_back(std::abs(n)); }
+        ulint(const uint64_t n, bool is_usigned) : neg(0) { data.push_back(n); } //TODO think of a better fix to "ulint(int n) is ambiguous"
         ulint(ulint &&other) : neg(other.neg) { data = std::move(other.data); }
         explicit ulint(const std::string &other);
         ~ulint() = default; 
+        
 
+        ulint operator-() const { ulint result(*this); result.neg = !neg; return result; }
+        ulint operator+() const { return (*this); }
 
         ulint operator+( const ulint &other ) const; 
         ulint operator-( const ulint &other ) const;
         ulint operator*( const ulint &other ) const; //TODO
         ulint operator/( const ulint &other ) const; //TODO
         ulint operator%( const ulint &other ) const; //TODO
-        ulint& operator+=( const ulint &other );     
-        ulint& operator-=( const ulint &other );
-        ulint& operator*=( const ulint &other );
-        ulint& operator/=( const ulint &other );
-        ulint& operator%=( const ulint &other );
-        ulint& operator=( const ulint &other );
+
+        ulint& operator+=( const ulint &other ) { (*this) = (*this) + other; return (*this); }
+        ulint& operator-=( const ulint &other ) { (*this) = (*this) - other; return (*this); }
+        ulint& operator*=( const ulint &other ) { (*this) = (*this) * other; return (*this); }
+        ulint& operator/=( const ulint &other ) { (*this) = (*this) / other; return (*this); } 
+        ulint& operator%=( const ulint &other ) { (*this) = (*this) % other; return (*this); }
+        ulint& operator= ( const ulint &other ) { neg = other.neg; data = other.data; return (*this); }
     
 
-        uint64_t operator%( const int &n ) const;
+        uint64_t operator%( const int &n ) const { return data[0] % n; };
 
         bool operator==( const ulint &other ) const { return (neg == other.neg && data == other.data); }
         bool operator< ( const ulint &other ) const;
         bool operator> ( const ulint &other ) const;
 
         operator bool() const { return (data.size() == 1 && data[0] == 0); }
+
+        void dump(std::ostream &out) {
+            if (neg)
+                out << "- ";
+            for (auto elem : data)
+                out << elem << ' ';
+            out << '\n';
+        }
         
         explicit operator std::string() const {
             ulint other(*this);
