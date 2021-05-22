@@ -47,8 +47,9 @@ TEST(Basic, GetSetTime) {
         t2.setMDay(rnd() % 32);
         t1.setMon(rnd() % 13);
         t2.setYear(rnd());
+	Time t3(t1);
         t1 += t2;
-        t2 += t1;
+        t2 += t3;
         EXPECT_EQ(t1, t2);
    }
 
