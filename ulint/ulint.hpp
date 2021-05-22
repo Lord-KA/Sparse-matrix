@@ -2,29 +2,40 @@
 #define UNINT_HPP
 
 #include <string>
-#include <deque>
+#include <vector>
 #include <iostream>
 #include <bitset>
 #include <climits>
 #include <algorithm>
 
-class ulint{
+class ulint {
     private:
-        bool neg;
-        std::deque<unsigned long long> data;
+        bool bitFill;
+        std::vector<unsigned long long> data;
 
 
     public:
         ulint() = default;
-        ulint(const ulint &other) : neg(other.neg), data(other.data) {}
-        ulint(const int n) : neg(n < 0) { data.push_back(std::abs(n)); }
-        ulint(const uint64_t n, bool is_usigned) : neg(0) { data.push_back(n); } //TODO think of a better fix to "ulint(int n) is ambiguous"
-        ulint(ulint &&other) : neg(other.neg) { data = std::move(other.data); }
+        ulint(const ulint &other) : bitFill(other.bitFill), data(other.data) {}
+        ulint(const int64_t n) : bitFill(n < 0) { data.push_back(n); }
+        ulint(const uint64_t n, bool is_usigned) : bitFill(0) { data.push_back(n); } //TODO think of a better fix to "ulint(int n) is ambiguous"
+        ulint(ulint &&other) : bitFill(other.bitFill) { data = std::move(other.data); }
         explicit ulint(const std::string &other);
         ~ulint() = default; 
         
 
-        ulint operator-() const { ulint result(*this); result.neg = !neg; return result; }
+        ulint operator-() const { 
+            ulint result(*this);
+            for (auto &elem : result.data)
+                elem = ~elem;
+            size_t i = 0;
+            size_t end = result.data.size();
+            while (i < end && __builtin_uaddll_overflow(result.data[i], 1, &result.data[i]))
+                ++i;
+            if (i == end)
+                result.data.push_back(1);
+            return result;
+        }
         ulint operator+() const { return (*this); }
 
         ulint operator+( const ulint &other ) const; 
@@ -38,19 +49,19 @@ class ulint{
         ulint& operator*=( const ulint &other ) { (*this) = (*this) * other; return (*this); }
         ulint& operator/=( const ulint &other ) { (*this) = (*this) / other; return (*this); } 
         ulint& operator%=( const ulint &other ) { (*this) = (*this) % other; return (*this); }
-        ulint& operator= ( const ulint &other ) { neg = other.neg; data = other.data; return (*this); }
+        ulint& operator= ( const ulint &other ) { bitFill = other.bitFill; data = other.data; return (*this); }
     
 
         uint64_t operator%( const int &n ) const { return data[0] % n; };
 
-        bool operator==( const ulint &other ) const { return (neg == other.neg && data == other.data); }
+        bool operator==( const ulint &other ) const { return (bitFill == other.bitFill && data == other.data); }
         bool operator< ( const ulint &other ) const;
         bool operator> ( const ulint &other ) const;
 
         operator bool() const { return (data.size() == 1 && data[0] == 0); }
 
         void dump(std::ostream &out) {
-            if (neg)
+            if (bitFill)
                 out << "- ";
             for (auto elem : data)
                 out << elem << ' ';
@@ -64,7 +75,7 @@ class ulint{
                 result.push_back(other % 10);
                 other /= 10;
             } while (other);
-            if (neg)
+            if (bitFill)
                 result.push_back('-');
             std::reverse(result.begin(), result.end());
             return result;
@@ -79,6 +90,10 @@ class ulint{
         friend std::istream& operator>>(std::istream &in, ulint &n) {
             char c;
             in.get(c);
+            if (c == '-'){
+                n.bitFill = 1;
+                in.get(c);
+            }
             while (!in.eof() && c != '\n') {
                 n *= 10;
                 n += c - '0';

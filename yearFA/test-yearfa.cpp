@@ -7,8 +7,19 @@
 
 std::mt19937 rnd(179);
 
+TEST(Basic, operators) {
+    for (int i = 0; i < 1000; ++i){
+        yearfa Y1(rnd() % 3000 + 1), Y2(rnd() % 3000 + 1), Y3;
+        Y3 = Y1 + Y2;
+        yearfa Y4(Y1 + Y2);
+        EXPECT_EQ(Y3, Y4);
+        std::stringstream out;
+        out << Y1 << Y2 << Y3 << Y4;
+    }
+}
+
 TEST(Basic, getSetTime) {
-    for (int i = 0; i < 100; ++i){
+    for (int i = 0; i < 1000; ++i){
         yearfa Y1(rnd() % 7000 + 1), Y2(rnd() % 7000 + 1), Y3;
         Y3 = Y2;
         yearfa Y4(Y1);
@@ -28,16 +39,5 @@ TEST(Basic, getSetTime) {
         uint16_t q = rnd() % 2000 + 10;
         Y3.setYearAC(q);
         EXPECT_EQ(Y3.getYearAC(), q);
-    }
-}
-
-TEST(Basic, operators) {
-    for (int i = 0; i < 100; ++i){
-        yearfa Y1(rnd() % 3000 + 1), Y2(rnd() % 3000 + 1), Y3;
-        Y3 = Y1 + Y2;
-        yearfa Y4(Y1 + Y2);
-        EXPECT_EQ(Y3, Y4);
-        std::stringstream out;
-        out << Y1 << Y2 << Y3 << Y4;
     }
 }

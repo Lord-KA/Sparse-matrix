@@ -45,7 +45,7 @@ void test_treap()
     
     std::cout << '\n';
 
-    Treap t2(t);
+    Treap<int, int> t2(t);
 
     for(auto elem : t2)
         std::cout << elem.second << ' ';
@@ -55,7 +55,7 @@ void test_treap()
 
     Treap<int, int> t3;
     t3 = std::move(t2);
-    Treap t4(t3);
+    Treap<int, int> t4(t3);
     std::cout << '\n';
     t.erase(8);
     for(auto elem : t)
@@ -150,11 +150,11 @@ void test_treap_3()
     for(auto elem : t)
         std::cout << "(" << elem.first << ", " <<  elem.second << ");  ";
     std::cout << '\n';
-    Treap t2(t);
+    Treap<int, int> t2(t);
     t2.erase(3);
     t2.erase(4);
     
-    Treap t3(t2);
+    Treap<int, int> t3(t2);
     for(auto elem : t2)
         std::cout << "(" << elem.first << ", " <<  elem.second << ");  ";
     std::cout << '\n';

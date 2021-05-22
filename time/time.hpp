@@ -50,6 +50,7 @@ class Time{
         Time& operator=(const Time &other);
         
         bool operator==(const Time &other) const { return unix_time == other.unix_time; }
+        bool operator!=(const Time &other) const { return unix_time != other.unix_time; }
 
         explicit operator uint64_t() const { return unix_time; }
 

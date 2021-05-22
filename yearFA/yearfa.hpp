@@ -15,11 +15,13 @@ class yearfa{
     public:
         explicit yearfa(uint16_t n = 0);
         yearfa(uint16_t indiction, uint16_t sunRing, uint16_t moonRing) : indiction(indiction), sunRing(sunRing), moonRing(moonRing) {}
+        //yearfa(const yearfa &other) indiction(other.in)
 
         ~yearfa() = default;
     
-        yearfa& operator=( const yearfa &other ) { indiction = other.indiction; sunRing = other.sunRing; moonRing = other.moonRing; return (*this); }
+        //yearfa& operator=( const yearfa &other ) { indiction = other.indiction; sunRing = other.sunRing; moonRing = other.moonRing; return (*this); }
         bool operator==(const yearfa &other) const { return indiction == other.indiction && sunRing == other.sunRing && moonRing == other.moonRing; }
+        bool operator!=(const yearfa &other) const { return indiction != other.indiction || sunRing != other.sunRing || moonRing != other.moonRing; }
 
         yearfa operator+( const yearfa &other) const { yearfa result(getYear() + other.getYear()); return result; }
         yearfa operator-( const yearfa &other) const { yearfa result(getYear() - other.getYear()); return result; }
