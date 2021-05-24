@@ -51,7 +51,7 @@ TEST(Multiplication, diffSizeCheckByValue) {
 
 TEST(Multiplication, RandomSquares) {
     for(int i = 0; i < 10; ++i){
-        int a = rnd() % 20 + 4;
+        int a = rnd() % 15 + 4;
         Matrix<int> M1(a, a), M2(a, a);
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
@@ -67,7 +67,7 @@ TEST(Multiplication, RandomSquares) {
 
 TEST(Multiplication, RandomDiffSize) {
     for(int i = 0; i < 10; ++i){
-        int a = rnd() % 20 + 3, b = rnd() % 20 + 3, c = rnd() % 20 + 3;
+        int a = rnd() % 15 + 3, b = rnd() % 15 + 3, c = rnd() % 15 + 3;
         Matrix<int> M1(a, b), M2(b, c);
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
@@ -80,7 +80,7 @@ TEST(Multiplication, RandomDiffSize) {
 
 TEST(Summing, RandomDiffSize) {
     for(int i = 0; i < 10; ++i){
-        int a = rnd() % 50 + 3, b = rnd() % 50 + 3;
+        int a = rnd() % 30 + 3, b = rnd() % 30 + 3;
         Matrix<int> M1(a, b), M2(a, b);
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
