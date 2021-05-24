@@ -8,7 +8,7 @@
 std::mt19937 rnd(179);
 
 TEST(Basic, operators) {
-    for (int i = 0; i < 100; ++i){
+    for (int i = 0; i < 1000; ++i){
         Time t1(rnd()), t2(rnd());
         t1 += t2;
         t1 += rnd();
@@ -36,4 +36,21 @@ TEST(Basic, operators) {
         out >> t6;
         EXPECT_NE( t1, t6 );
     }
+}
+
+TEST(Basic, GetSetTime) {
+    for (int i = 0; i < 1000; ++i){
+        Time t1(rnd()), t2(rnd());
+        t1.setSec(rnd() % 61);
+        t2.setMin(rnd() % 61);
+        t1.setHour(rnd() % 25);
+        t2.setMDay(rnd() % 32);
+        t1.setMon(rnd() % 13);
+        t2.setYear(rnd());
+	Time t3(t1);
+        t1 += t2;
+        t2 += t3;
+        EXPECT_EQ(t1, t2);
+   }
+
 }

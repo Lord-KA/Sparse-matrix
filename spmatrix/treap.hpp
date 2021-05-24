@@ -10,6 +10,15 @@
 #include <set>
 
 std::mt19937 rnd(179);
+
+template<class T, class U = T>
+T exchange(T& obj, U&& new_value)
+{
+    T old_value = std::move(obj);
+    obj = std::forward<U>(new_value);
+    return old_value;
+}
+
 //==================================
 // Object pool
 
@@ -27,9 +36,9 @@ public:
 
     ObjPool(ObjPool &&other)
     {
-        capacity = std::exchange(other.capacity, 0);
-        last_free = std::exchange(other.last_free, -1);
-        data = std::exchange(other.data, nullptr);
+        capacity = exchange(other.capacity, 0);
+        last_free = exchange(other.last_free, -1);
+        data = exchange(other.data, nullptr);
     }
 
     ObjPool& operator=(const ObjPool &other)
@@ -45,11 +54,11 @@ public:
 
     ObjPool& operator=(ObjPool &&other)
     {
-        capacity = std::exchange(other.capacity, 0);
-        last_free = std::exchange(other.last_free, -1);
+        capacity = exchange(other.capacity, 0);
+        last_free = exchange(other.last_free, -1);
         if (data)
             delete[] data;
-        data = std::exchange(other.data, nullptr);
+        data = exchange(other.data, nullptr);
         return (*this);
     }
     
@@ -131,6 +140,7 @@ private:
 //==================================
 // Treap
 
+#ifndef NDEBUG
 #define TREAP_CHECK(v) { \
     if (!graph_check(v)) \
     { \
@@ -138,6 +148,9 @@ private:
         std::cerr.flush(); \
         std::exit(0); \
     } }
+#else
+#define TREAP_CHECK(v) {}
+#endif
 
 template<typename Key, typename Data>
 class Treap 
@@ -172,6 +185,7 @@ public:
         Iterator( const Iterator &other )                     : id(other.id), pool(other.pool) {};
         
         bool operator==( const Iterator other ) { return id == other.id;}
+        bool operator!=( const Iterator other ) { return id != other.id;}
 
         std::pair<Key, Data&> operator*() { Node* v = pool->get(id); \
                                             return {v->x, v->val}; }
@@ -302,6 +316,7 @@ public:
     Treap& operator=( Treap &&other );
 
     bool  operator==( const Treap &other ) const;
+    bool  operator!=( const Treap &other ) const { return !((*this) == other); }
 
     void   insert( Key x, Data val );
     Data*  insert( Key x );
@@ -355,7 +370,7 @@ private:
 template<typename Key, typename Data>
 Treap<Key, Data>::Treap(Treap &&other)
 {
-    root_id = std::exchange(other.root_id, -1);
+    root_id = exchange(other.root_id, -1);
     pool = std::move(other.pool);
 }
 
@@ -371,7 +386,7 @@ Treap<Key, Data>& Treap<Key, Data>::operator=(const Treap<Key, Data> &other)
 template<typename Key, typename Data>
 Treap<Key, Data>& Treap<Key, Data>::operator=(Treap<Key, Data> &&other)
 {
-    root_id = std::exchange(other.root_id, -1);
+    root_id = exchange(other.root_id, -1);
     pool = std::move(other.pool);
     return (*this);
 }
@@ -433,7 +448,7 @@ Data* Treap<Key, Data>::insert(Key x)
 
 
 template<typename Key, typename Data>
-size_t Treap<Key, Data>::erase(size_t id, Key x)
+size_t Treap<Key, Data>::erase(size_t id, Key x) //TODO find error
 {
     if (id == -1)
         return -1;

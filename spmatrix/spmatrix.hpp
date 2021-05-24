@@ -56,6 +56,7 @@ class SPMatrix{                                            //TODO fix cleanUp;
         SPMatrix operator*=( const T &n );   
 
         bool operator==( const SPMatrix &other ) const;
+        bool operator!=( const SPMatrix &other ) const { return !((*this) == other); }
 
         void cleanUp() {return; removeByValue(nullVal); }  //TODO fix "Treap error in merge at 526" (I assume problem is in erase);
 
@@ -64,10 +65,6 @@ class SPMatrix{                                            //TODO fix cleanUp;
         const T& operator() ( const size_t i, const size_t j ) const;
         T& operator() ( const size_t i, const size_t j );
         
-        // void insert( size_t x, size_t y, T value );
-        // void pop   ( size_t x, size_t y );
-
-        //TODO think if get/set len/rows/cols funcs are needed
 
     friend std::ostream& operator<<( std::ostream &out, const SPMatrix &M){
         for(size_t i=0; i < M.rows; ++i){

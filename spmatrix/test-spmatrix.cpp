@@ -18,8 +18,8 @@ TEST(Multiplication, toEandConst) {
     M2(1, 1) = 1;
     SPMatrix<int> S1(M1), S2(M2);
 
-    EXPECT_EQ( SPMatrix(M1 * M2), S1 * S2 );
-    EXPECT_EQ( SPMatrix(M2 * M1), S2 * S1 );
+    EXPECT_EQ( SPMatrix<int>(M1 * M2), S1 * S2 );
+    EXPECT_EQ( SPMatrix<int>(M2 * M1), S2 * S1 );
     EXPECT_EQ( S1 * S1, S1 * S1);
     EXPECT_EQ( S2 * S2, S2 * S2);
     
@@ -45,49 +45,52 @@ TEST(Multiplication, diffSizeCheckByValue) {
 
     SPMatrix<int> S3(M3), S4(M4);
 
-    EXPECT_EQ( SPMatrix(M3 * M4), S3 * S4 );
+    EXPECT_EQ( SPMatrix<int>(M3 * M4), S3 * S4 );
     EXPECT_EQ( S3 * n * S4, n * S3 * S4);
 }
 
 TEST(Multiplication, RandomSquares) {
-    for(int i = 0; i < 100; ++i){
-        Matrix<int> M1(5, 5), M2(5, 5);
+    for(int i = 0; i < 10; ++i){
+        int a = rnd() % 15 + 4;
+        Matrix<int> M1(a, a), M2(a, a);
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
     
         SPMatrix<int> S1(M1), S2(M2);
-        EXPECT_EQ( SPMatrix(M1 * M2), S1 * S2 );
-        EXPECT_EQ( SPMatrix(M2 * M1), S2 * S1 );
-        EXPECT_EQ( SPMatrix(M1 * M1), S1 * S1 );
-        EXPECT_EQ( SPMatrix(M2 * M2), S2 * S2 );
-        EXPECT_NE( SPMatrix(M1 * M2 * M1), S1 * S2 );
+        EXPECT_EQ( SPMatrix<int>(M1 * M2), S1 * S2 );
+        EXPECT_EQ( SPMatrix<int>(M2 * M1), S2 * S1 );
+        EXPECT_EQ( SPMatrix<int>(M1 * M1), S1 * S1 );
+        EXPECT_EQ( SPMatrix<int>(M2 * M2), S2 * S2 );
+        EXPECT_NE( SPMatrix<int>(M1 * M2 * M1), S1 * S2 );
     }
 }
 
 TEST(Multiplication, RandomDiffSize) {
-    for(int i = 0; i < 40; ++i){
-        Matrix<int> M1(7, 8), M2(8, 12);
+    for(int i = 0; i < 10; ++i){
+        int a = rnd() % 15 + 3, b = rnd() % 15 + 3, c = rnd() % 15 + 3;
+        Matrix<int> M1(a, b), M2(b, c);
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
     
         SPMatrix<int> S1(M1), S2(M2);
-        EXPECT_EQ( SPMatrix(M1 * M2), S1 * S2 );
+        EXPECT_EQ( SPMatrix<int>(M1 * M2), S1 * S2 );
     }
 }
 
 
 TEST(Summing, RandomDiffSize) {
-    for(int i = 0; i < 40; ++i){
-        Matrix<int> M1(4, 12), M2(4, 12);
+    for(int i = 0; i < 10; ++i){
+        int a = rnd() % 30 + 3, b = rnd() % 30 + 3;
+        Matrix<int> M1(a, b), M2(a, b);
         M1.FillMatrixRandom();
         M2.FillMatrixRandom();
     
         SPMatrix<int> S1(M1), S2(M2);
-        EXPECT_EQ( SPMatrix(M1 + M2), S1 + S2 );
-        EXPECT_EQ( SPMatrix(M2 + M1), S2 + S1 );
-        EXPECT_EQ( SPMatrix(M1 + M1), S1 + S1 );
-        EXPECT_EQ( SPMatrix(M2 + M2), S2 + S2 );
-        EXPECT_NE( SPMatrix(M1 + M1 + M1), S1 + S2 );
+        EXPECT_EQ( SPMatrix<int>(M1 + M2), S1 + S2 );
+        EXPECT_EQ( SPMatrix<int>(M2 + M1), S2 + S1 );
+        EXPECT_EQ( SPMatrix<int>(M1 + M1), S1 + S1 );
+        EXPECT_EQ( SPMatrix<int>(M2 + M2), S2 + S2 );
+        EXPECT_NE( SPMatrix<int>(M1 + M1 + M1), S1 + S2 );
     }
 }
 
@@ -98,11 +101,11 @@ TEST(Summing, RandomDiffSizeSubraction) {
         M2.FillMatrixRandom();
     
         SPMatrix<int> S1(M1), S2(M2);
-        EXPECT_EQ( SPMatrix(M1 - M2), S1 - S2 );
-        EXPECT_EQ( SPMatrix(M2 - M1), S2 - S1 );
-        EXPECT_EQ( SPMatrix(M1 - M1), S1 - S1 );
-        EXPECT_EQ( SPMatrix(M2 - M2), S2 - S2 );
-        EXPECT_NE( SPMatrix(M1 - M1 + M1), S1 - S2 );
+        EXPECT_EQ( SPMatrix<int>(M1 - M2), S1 - S2 );
+        EXPECT_EQ( SPMatrix<int>(M2 - M1), S2 - S1 );
+        EXPECT_EQ( SPMatrix<int>(M1 - M1), S1 - S1 );
+        EXPECT_EQ( SPMatrix<int>(M2 - M2), S2 - S2 );
+        EXPECT_NE( SPMatrix<int>(M1 - M1 + M1), S1 - S2 );
     }
 }
 
@@ -114,15 +117,15 @@ TEST(Summing, RandomMultiplByConst) {
         M2.FillMatrixRandom();
     
         SPMatrix<int> S1(M1), S2(M2);
-        EXPECT_EQ( SPMatrix(M1 + M2 * cnst), S1 + S2 * cnst );
-        EXPECT_EQ( SPMatrix(M2 + M1 * cnst), S2 + S1 * cnst );
-        EXPECT_EQ( SPMatrix(M1 + M1), S1 + S1 );
-        EXPECT_EQ( SPMatrix(-M1), -S1);
-        EXPECT_EQ( SPMatrix(M2), +S2);
+        EXPECT_EQ( SPMatrix<int>(M1 + M2 * cnst), S1 + S2 * cnst );
+        EXPECT_EQ( SPMatrix<int>(M2 + M1 * cnst), S2 + S1 * cnst );
+        EXPECT_EQ( SPMatrix<int>(M1 + M1), S1 + S1 );
+        EXPECT_EQ( SPMatrix<int>(-M1), -S1);
+        EXPECT_EQ( SPMatrix<int>(M2), +S2);
 
 
-        EXPECT_EQ( SPMatrix(M2 + 3 * M2 * 2 * cnst), 3 * S2 * 2 * cnst + S2 );
-        EXPECT_NE( SPMatrix(M1 + M1 + M1), S1 * 13 + S2 );
+        EXPECT_EQ( SPMatrix<int>(M2 + 3 * M2 * 2 * cnst), 3 * S2 * 2 * cnst + S2 );
+        EXPECT_NE( SPMatrix<int>(M1 + M1 + M1), S1 * 13 + S2 );
     }
 }
 
@@ -134,9 +137,9 @@ TEST(Other, Transposing) {
     
         SPMatrix<int> S1(M1), S2(M2);
 
-        EXPECT_EQ( SPMatrix(M1.Transposition()), S1.Transpose() );
-        EXPECT_EQ( SPMatrix(M2.Transposition()), S2.Transpose() );
-        EXPECT_NE( SPMatrix(M1.Transposition()), S2.Transpose() );
+        EXPECT_EQ( SPMatrix<int>(M1.Transposition()), S1.Transpose() );
+        EXPECT_EQ( SPMatrix<int>(M2.Transposition()), S2.Transpose() );
+        EXPECT_NE( SPMatrix<int>(M1.Transposition()), S2.Transpose() );
     }
 }
 
@@ -144,39 +147,39 @@ TEST(Other, Copy) {
     for (int i = 0; i < 3; ++i){
         Matrix<int> M1(4, 18);
         M1.FillMatrixRandom();
-        Matrix M2(M1);
+        Matrix<int> M2(M1);
         M2.FillMatrixRandom();
-        SPMatrix S1(M1), S2(M2);
-        SPMatrix S3 = S1 + S2;
-        Matrix M3 = M1 + M2;
-        SPMatrix S4(S1 + S3);
-        Matrix M4(M3 + M1);
+        SPMatrix<int> S1(M1), S2(M2);
+        SPMatrix<int> S3 = S1 + S2;
+        Matrix<int> M3 = M1 + M2;
+        SPMatrix<int> S4(S1 + S3);
+        Matrix<int> M4(M3 + M1);
 
-        EXPECT_EQ(SPMatrix(M3), S3);
-        EXPECT_EQ(SPMatrix(M4), S4);
+        EXPECT_EQ(SPMatrix<int>(M3), S3);
+        EXPECT_EQ(SPMatrix<int>(M4), S4);
         SPMatrix<int> S5;
         S5 = S1 * 17 + S3;
         Matrix<int> M5;
         M5 = M1 * 17 + M3;
-        EXPECT_EQ(SPMatrix(M5), S5);
+        EXPECT_EQ(SPMatrix<int>(M5), S5);
         S5 += S4;
         M5 = M5 + M4;
-        EXPECT_EQ(SPMatrix(M5), S5);
+        EXPECT_EQ(SPMatrix<int>(M5), S5);
         S5 -= S3;
         M5 = M5 - M3;
-        EXPECT_EQ(SPMatrix(M5), S5);
+        EXPECT_EQ(SPMatrix<int>(M5), S5);
         
         Matrix<int> MM1(12, 23), MM2(23, 19);
         MM1.FillMatrixRandom();
         MM2.FillMatrixRandom();
-        SPMatrix SS1(MM1), SS2(MM2);
+        SPMatrix<int> SS1(MM1), SS2(MM2);
         SS1 *= SS2;
         MM1 = MM1 * MM2;
         SS1 *= 127 * i;
         MM1 = MM1 * 127 * i;
-        EXPECT_EQ(SPMatrix(MM1), SS1);
-        EXPECT_NE(SPMatrix(MM1), S1);
-        EXPECT_NE(SPMatrix(M4), S2);
+        EXPECT_EQ(SPMatrix<int>(MM1), SS1);
+        EXPECT_NE(SPMatrix<int>(MM1), S1);
+        EXPECT_NE(SPMatrix<int>(M4), S2);
     }
 
 }
@@ -193,11 +196,11 @@ TEST(Other, Move) {
         M3 = std::move(M1);
         M4 = std::move(M2);
     
-        EXPECT_EQ(SPMatrix(M3), S3);
-        EXPECT_EQ(SPMatrix(M4), S4);
-        SPMatrix S5(std::move(S3));
-        Matrix M5(std::move(M3));
-        EXPECT_EQ(SPMatrix(M5), S5);
+        EXPECT_EQ(SPMatrix<int>(M3), S3);
+        EXPECT_EQ(SPMatrix<int>(M4), S4);
+        SPMatrix<int> S5(std::move(S3));
+        Matrix<int> M5(std::move(M3));
+        EXPECT_EQ(SPMatrix<int>(M5), S5);
     }     
 }
 
