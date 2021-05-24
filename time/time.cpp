@@ -4,13 +4,16 @@ void Time::update(std::tm t)
 { 
     time = t;
     unix_time = std::mktime(&time);
+    assert(unix_time != -1);
 }
 
 void Time::update(uint64_t u_t)
 {
     unix_time = u_t;
     time_t t = static_cast<time_t>(u_t);
-    time = *std::gmtime(&t);
+    std::tm *tmp = std::gmtime(&t);
+    assert(tmp);
+    time = *tmp;
 }
 
 

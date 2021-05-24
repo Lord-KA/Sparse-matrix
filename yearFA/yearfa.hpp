@@ -32,9 +32,9 @@ class yearfa{
         int getYear()   const;
         int getYearAC() const { return getYear() - 5508; }
 
-        void setIndiction(uint16_t n) { indiction = n; }
-        void setSunRing(  uint16_t n) { sunRing = n; }
-        void setMoonRing( uint16_t n) { moonRing = n; }
+        void setIndiction(uint16_t n) { assert(1 <= n && n <= 15); indiction = n; }
+        void setSunRing(  uint16_t n) { assert(1 <= n && n <= 28); sunRing = n; }
+        void setMoonRing( uint16_t n) { assert(1 <= n && n <= 19); moonRing = n; }
         void setYear(     uint16_t n);
         void setYearAC(   uint16_t n) { setYear(n + 5508); }     // set by year according to Christ
         

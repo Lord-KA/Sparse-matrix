@@ -7,17 +7,18 @@
 #include <bitset>
 #include <climits>
 #include <algorithm>
+#include <cassert>
 
 class ulint {
     private:
-        bool bitFill;
+        unsigned long long bitFill;
         std::vector<unsigned long long> data;
 
 
     public:
         ulint() = default;
         ulint(const ulint &other) : bitFill(other.bitFill), data(other.data) {}
-        ulint(const int64_t n) : bitFill(n < 0) { data.push_back(n); }
+        ulint(const int64_t n) : bitFill(static_cast<uint64_t>(n < 0) * ULLONG_MAX) { data.push_back(n); }
         ulint(const uint64_t n, bool is_usigned) : bitFill(0) { data.push_back(n); } //TODO think of a better fix to "ulint(int n) is ambiguous"
         ulint(ulint &&other) : bitFill(other.bitFill) { data = std::move(other.data); }
         explicit ulint(const std::string &other);
@@ -34,6 +35,7 @@ class ulint {
                 ++i;
             if (i == end)
                 result.data.push_back(1);
+            result.bitFill = ~bitFill;
             return result;
         }
         ulint operator+() const { return (*this); }
@@ -46,7 +48,7 @@ class ulint {
 
         ulint& operator+=( const ulint &other ) { (*this) = (*this) + other; return (*this); }
         ulint& operator-=( const ulint &other ) { (*this) = (*this) - other; return (*this); }
-        ulint& operator*=( const ulint &other ) { (*this) = (*this) * other; return (*this); }
+        ulint& operator*=( const ulint &other );
         ulint& operator/=( const ulint &other ) { (*this) = (*this) / other; return (*this); } 
         ulint& operator%=( const ulint &other ) { (*this) = (*this) % other; return (*this); }
         ulint& operator= ( const ulint &other ) { bitFill = other.bitFill; data = other.data; return (*this); }
@@ -91,7 +93,7 @@ class ulint {
             char c;
             in.get(c);
             if (c == '-'){
-                n.bitFill = 1;
+                n.bitFill = ULLONG_MAX;
                 in.get(c);
             }
             while (!in.eof() && c != '\n') {
