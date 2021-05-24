@@ -4,7 +4,6 @@ void Time::update(std::tm t)
 { 
     time = t;
     unix_time = std::mktime(&time);
-    assert(unix_time != -1);
 }
 
 void Time::update(uint64_t u_t)

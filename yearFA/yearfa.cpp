@@ -1,7 +1,7 @@
 #include "yearfa.hpp"
 
 yearfa::yearfa(uint16_t year){    
-    assert(1 <= year && year <= armageddon);
+    assert(0 <= year && year <= armageddon);
     indiction = year % 15;
     if (!indiction)
         indiction = 15;

@@ -79,7 +79,7 @@ TEST(Multiplication, RandomDiffSize) {
 
 
 TEST(Summing, RandomDiffSize) {
-    for(int i = 0; i < 20; ++i){
+    for(int i = 0; i < 10; ++i){
         int a = rnd() % 50 + 3, b = rnd() % 50 + 3;
         Matrix<int> M1(a, b), M2(a, b);
         M1.FillMatrixRandom();

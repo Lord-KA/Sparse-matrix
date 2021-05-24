@@ -9,7 +9,7 @@ std::mt19937 rnd(179);
 
 TEST(Basic, operators) {
     for (int i = 0; i < 1000; ++i){
-        yearfa Y1(rnd() % 3000 + 1), Y2(rnd() % 3000 + 1), Y3;
+        yearfa Y1(rnd() % 3000 + 2), Y2(rnd() % 3000 + 2), Y3;
         Y3 = Y1 + Y2;
         yearfa Y4(Y1 + Y2);
         EXPECT_EQ(Y3, Y4);
