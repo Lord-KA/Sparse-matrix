@@ -1,6 +1,7 @@
 #include "treap.hpp"
 #include <cassert>
 
+#ifndef NDEBUG
 void test_treap()
 {
     Treap<int, int> t;
@@ -168,10 +169,11 @@ void test_treap_3()
     assert( t2 == t3 ); 
     std::cout << "All good!\n"; 
 }
-
+#endif
 
 int main()
 {
+    #ifndef NDEBUG
     test_treap();
     std::cerr << "\n\n\n";
 
@@ -181,6 +183,7 @@ int main()
     
     std::cerr << "\n\n\n";
     test_treap_3();
+    #endif
     return 0;
 }
 
